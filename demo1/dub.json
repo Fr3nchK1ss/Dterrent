@@ -1,0 +1,14 @@
+{
+	"authors": [
+		"ludo456"
+	],
+	"copyright": "Copyright © 2020, ludo456",
+	"description": "test app for dterrent",
+	"license": "proprietary",
+	"name": "demo1",
+	"dependencies": {
+		"dterrent" : { "path": "../" }
+	},
+
+	"targetPath": "../bin"
+}
