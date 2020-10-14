@@ -1,11 +1,13 @@
-# Dterrent
+![D](https://github.com/ludo456/Dterrent/workflows/D/badge.svg)
+
+# Dterrent 
 
 Minimalist game engine in D (Digital Mars). Intended for Linux.
 
 Dterrent tries to salvage the defunct yage3D project, at least its architecture, ideally replacing most of the former components with D2 features or Dub packages. In this aspect, it is a proof of concept for a 3D engine built upon community-made "building bricks", without reinventing the wheel.
 *Note: ludo456 was a contributor to the original yage3D project.*
 
-## Libs changes
+## Current libs changes
 
 * derelict		-> bindbc (bindings to SDL2)
 * tango.core.Thread	-> core.thread.osthread
@@ -16,9 +18,9 @@ Dterrent tries to salvage the defunct yage3D project, at least its architecture,
 
 ## Dependencies
 You need to install:
-* libsdl2		sudo apt install libsdl2
-* libsdl2-image	sudo apt install libsdl2-image
-* libopenal		sudo apt install libopenal1
+* libsdl2	`sudo apt install libsdl2`
+* libsdl2-image `sudo apt install libsdl2-image`
+* libopenal	`sudo apt install libopenal1`
 
 ## Build and Run
 Just run `dub build` to build the engine library and / or in Demo1 directory, run `dub run` to test the engine.
