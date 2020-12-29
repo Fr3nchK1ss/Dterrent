@@ -53,50 +53,50 @@ abstract class System
 
 	protected static Thread calling_thread; 		// reference to thread that called init, typically the main thread
 
-	/**
-	 * This function creates a window with the specified width and height in pixels.
-	 * It also initializes an OpenAL context so that audio playback can occur.
-	 * It must be called before most other code.
-	 * Params:
-	 * width = Width of the window in pixels
-	 * height = Height of the window in pixels
-	 * depth = Color depth of each pixel (should be 16, 24 or 32)
-	 * fullscreen = The window is fullscreen if true; windowed otherwise.
-	 * samples = The level of anti-aliasing.
-	 */
+	/* Mixins declarations */
+	mixin template mxtpl_logLoadError(E, string libName) {
+		void logLoadError(){
+			E magic;
+			if( magic == E.badLibrary ) {
+				/*Usually this means that either the library or one of its dependencies could not be found.*/
+				fatal(libName ~ " not found.");
+			}
+			else if ( magic == E.noLibrary ) {
+				/* e.g., an SDL 2.0.2 library loaded by an SDL 2.0.10 configuration.*/
+				fatal ("The system was able to find and successfully load" ~ libName ~
+							" but one or more symbols the binding expected to find was missing."
+							~" This usually indicates that the loaded library is of a lower API "
+							~"version than expected.");
+			}
+		}
+
+	}
+
+
+	/* Load external libs */
 	static void init()
 	{
+		// Initialize sharedLog global
 		sharedLog = new DtrtLogger();
 
+		// variables
 		active = true;
 		this.calling_thread = Thread.getThis();
 
-		/*
-			From bindbc doc: attempts to load the SDL shared library using well-known
-			variations of the library name for the host system.
-		*/
-		if(loadSDL() != sdlSupport) {
-			fatal("Could not load sdlSupport.");
-		}
-		if(loadSDLImage() != sdlImageSupport) {
-			fatal("Could not load sdlImageSupport.");
+		SDLSupport sdlMagic = loadSDL();
+		if(sdlMagic != sdlSupport) {
+			mixin mxtpl_logLoadError!(SDLSupport, "SDL"); logLoadError();
 		}
 
-		ALSupport ret = loadOpenAL();
-		if(ret != ALSupport.al11)
-		{
-		    if(ret == ALSupport.noLibrary) {
-					fatal("OpenAL not found.");
-		    }
-		    else if(ALSupport.badLibrary) {
-		    	fatal("One or more OpenAL symbols failed to load.");
-		    }
+		SDLImageSupport sdlImageMagic = loadSDLImage();
+		if(sdlImageMagic != sdlImageSupport) {
+			mixin mxtpl_logLoadError!(SDLImageSupport, "SDLImage"); logLoadError();
 		}
 
-		// Currently DerelictGL is loaded in Window's constructor.
-//		DerelictSDL2.load();
-//		DerelictSDL2Image.load();
-//		DerelictAL.load();
+		ALSupport alMagic = loadOpenAL();//using bindbc.openal;
+		if( alMagic != ALSupport.al11 ) {
+			mixin mxtpl_logLoadError!(ALSupport, "OpenAL"); logLoadError();
+		}
 
 		//Libraries.loadVorbis();
 		//Libraries.loadFreeType();

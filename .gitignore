@@ -13,3 +13,9 @@ dterrent-test-*
 *.o
 *.obj
 *.lst
+*.log
+*.bak
+*.selections.json
+Diamond-master
+bin
+

@@ -4,7 +4,7 @@
 
 	Minimal Dterrent test application
  */
- 
+
 module demo1;
 
 import dterrent;
