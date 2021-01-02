@@ -11,6 +11,7 @@
 	"dependencies": {
 		"bindbc-sdl": ">=0.19.1",
 		"bindbc-openal": ">=0.4.1",
+		"bindbc-freetype": ">=0.9.1"
 	},
 	"versions": [
 		"SDL_Image"

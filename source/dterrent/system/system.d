@@ -2,20 +2,15 @@
 	Authors: ludo456 on github
 	Copyright: proprietary / contact dev
 
-	Minimal Dterrent test application. This class is a
-	rewrite of yage3D System class.
+	This class is a rewrite of yage3D System class.
  */
 
 module dterrent.system.system;
 
-
 import core.thread.osthread;
-import bindbc.sdl;
-import bindbc.sdl.image;
-import bindbc.openal;
-
 import dterrent.system.logger;
 import std.experimental.logger; //to use global sharedLog
+import dterrent.system.libloader;
 
 /+
 import std.range;
@@ -23,12 +18,10 @@ import std.range;
 import tango.stdc.stringz;
 import tango.core.Memory;
 
-import derelict.openal.al;
 import derelict.opengl3.gl;
 import derelict.opengl3.ext;
 import derelict.util.exception;
 
-import derelict.freetype.ft;
 import yage.core.all;
 import yage.gui.surface;
 
@@ -39,7 +32,6 @@ import yage.core.math.vector;
 import yage.scene.scene;
 import yage.resource.manager;
 import yage.system.window;
-import yage.system.libraries;
 +/
 
 /**
@@ -53,26 +45,6 @@ abstract class System
 
 	protected static Thread calling_thread; 		// reference to thread that called init, typically the main thread
 
-	/* Mixins declarations */
-	mixin template mxtpl_logLoadError(E, string libName) {
-		void logLoadError(){
-			E magic;
-			if( magic == E.badLibrary ) {
-				/*Usually this means that either the library or one of its dependencies could not be found.*/
-				fatal(libName ~ " not found.");
-			}
-			else if ( magic == E.noLibrary ) {
-				/* e.g., an SDL 2.0.2 library loaded by an SDL 2.0.10 configuration.*/
-				fatal ("The system was able to find and successfully load" ~ libName ~
-							" but one or more symbols the binding expected to find was missing."
-							~" This usually indicates that the loaded library is of a lower API "
-							~"version than expected.");
-			}
-		}
-
-	}
-
-
 	/* Load external libs */
 	static void init()
 	{
@@ -83,23 +55,7 @@ abstract class System
 		active = true;
 		this.calling_thread = Thread.getThis();
 
-		SDLSupport sdlMagic = loadSDL();
-		if(sdlMagic != sdlSupport) {
-			mixin mxtpl_logLoadError!(SDLSupport, "SDL"); logLoadError();
-		}
-
-		SDLImageSupport sdlImageMagic = loadSDLImage();
-		if(sdlImageMagic != sdlImageSupport) {
-			mixin mxtpl_logLoadError!(SDLImageSupport, "SDLImage"); logLoadError();
-		}
-
-		ALSupport alMagic = loadOpenAL();//using bindbc.openal;
-		if( alMagic != ALSupport.al11 ) {
-			mixin mxtpl_logLoadError!(ALSupport, "OpenAL"); logLoadError();
-		}
-
-		//Libraries.loadVorbis();
-		//Libraries.loadFreeType();
+		LibLoader.loadAll();
 
 		// Create OpenAL device, context, and start sound processing thread.
 		//SoundContext.init();

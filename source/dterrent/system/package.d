@@ -6,7 +6,6 @@
 
 module dterrent.system;
 
-
 public
 {
 	import dterrent.system.system;
