@@ -15,6 +15,7 @@ bool running = true;
 void main()
 {
 	// Init and create window
-	System.init();
+	dterrent.system.init();
 
+	dterrent.system.stop();
 }

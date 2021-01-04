@@ -10,7 +10,7 @@ module dterrent.system.system;
 import core.thread.osthread;
 import dterrent.system.logger;
 import std.experimental.logger; //to use global sharedLog
-import dterrent.system.libloader;
+import libloader = dterrent.system.libloader;
 
 /+
 import std.range;
@@ -34,119 +34,90 @@ import yage.resource.manager;
 import yage.system.window;
 +/
 
-/**
- * The System class exists to initilize/deinitialize the engine.
- */
-abstract class System
+
+Thread system_thread; 		// reference to thread that called init, typically the main thread
+
+/* Load external libs */
+void init()
 {
-	protected static bool active = false;		// true if between a call to init and deinit, inclusive
-	protected static bool initialized=false;	// true if between a call to init and deinit, exclusive
-	protected static bool aborted = false; 		// this flag is set when the engine is ready to exit.
+    import std.datetime.stopwatch : StopWatch, AutoStart;
+	auto stopWatch = StopWatch(AutoStart.yes);
 
-	protected static Thread calling_thread; 		// reference to thread that called init, typically the main thread
+	// Init variables
+	sharedLog = new DtrtLogger(); // is a global
+	system_thread = Thread.getThis();
 
-	/* Load external libs */
-	static void init()
-	{
-		// Initialize sharedLog global
-		sharedLog = new DtrtLogger();
+	// Load external libraries
+	libloader.loadAll();
 
-		// variables
-		active = true;
-		this.calling_thread = Thread.getThis();
+    if (libloader.isOpenALLoaded())
+    {
+        info("openALLoaded");
+        // Create OpenAL device, context, and start sound processing thread.
+        //SoundContext.init();
+    }
 
-		LibLoader.loadAll();
+	stopWatch.stop();
+	infof("Dterrent initialized in %s msecs", stopWatch.peek.total!"msecs");
+}
 
-		// Create OpenAL device, context, and start sound processing thread.
-		//SoundContext.init();
 
-		initialized = true;
-		info("Dterrent initialized!");
+/**
+ * Perform a clean stop of the engine
+ */
+void stop()
+{
+    /**
+     * The assert is useful to ensure that rendering functions aren't called from
+     * other threads. Always returns false if called before System.init()
+     */
+	assert(system_thread && Thread.getThis() == system_thread);
+
+    /*
+	// TODO FIX THIS
+	//SDL_WM_GrabInput(SDL_GRAB_OFF);
+	SDL_ShowCursor(true);
+
+	SoundContext.deInit(); // stop the sound thread
+
+	foreach ( s; retro (Scene.getAllScenes().values) )
+		s.dispose();
+
+	Render.cleanup(0); // textures, vbo's, and other OpenGL resources
+
+	ResourceManager.dispose();
+
+	if (Window.getInstance())
+		Window.getInstance().dispose();
+
+	// TODO: This shouldn't be needed to force any calls to dispose.
+	//GC.collect(); // Crashes when called in debug mode
+
+    */
+
+    libloader.unloadAll();
+
+}
+
+
+struct Credit
+{	string name;
+	string handle;
+	string code;
+	string license;
+	static Credit opCall(string name, string handle, string code, string license)
+	{	Credit result;
+		result.name=name;
+		result.handle=handle;
+		result.code=code;
+		result.license=license;
+		return result;
 	}
-/+
-	/**
-	 * Release all Yage Resources.
-	 * If System.init() is called, this must be called for cleanup before the program closes.
-	 * After calling this function, many Yage functions can no longer be called safely. */
-	static void deInit()
-	{	assert(isSystemThread());
+}
 
-		initialized = false;
-
-		// TODO FIX THIS
-		//SDL_WM_GrabInput(SDL_GRAB_OFF);
-		SDL_ShowCursor(true);
-
-		SoundContext.deInit(); // stop the sound thread
-
-		foreach ( s; retro (Scene.getAllScenes().values) )
-			s.dispose();
-
-		Render.cleanup(0); // textures, vbo's, and other OpenGL resources
-
-		ResourceManager.dispose();
-
-		if (Window.getInstance())
-			Window.getInstance().dispose();
-
-		// TODO: This shouldn't be needed to force any calls to dispose.
-		//GC.collect(); // Crashes when called in debug mode
-
-		SDL_Quit();
-		DerelictSDL2.unload();
-		DerelictSDL2Image.unload();
-		DerelictAL.unload();
-		Libraries.loadVorbis(false);
-		Libraries.loadFreeType(false);
-		active = false;
-		Log.info("Yage has been de-initialized successfully.");
-	}
-
-	/**
-	 * Returns true if called from the same thread as what System.init() was called.
-	 * This is useful to ensure that rendering functions aren't called from other threads.
-	 * Always returns false if called before System.init() */
-	static bool isSystemThread()
-	{	if (self_thread)
-			return !!(Thread.getThis() == self_thread);
-		return false;
-	}
-+/
-
-	struct Credit
-	{	string name;
-		string handle;
-		string code;
-		string license;
-		static Credit opCall(string name, string handle, string code, string license)
-		{	Credit result;
-			result.name=name;
-			result.handle=handle;
-			result.code=code;
-			result.license=license;
-			return result;
-		}
-	}
-
-	static Credit[] getCredits()
-	{//TODO update list to match reality
-		return [
-		    Credit("Joe Pusderis", "Deformative", "The first versions of yage.gui.surface, initial version of terrain support, .obj model file format loader, linux fixes", "LGPL v3"),
-		    Credit("Brandon Lyons", "Etherous", "Ideas and interface for a second version of the Terrain engine", "Boost 1.0"),
-		    Credit("Ludovic Angot", "anarky", "Linux fixes", "Boost 1.0"),
-		    Credit("William V. Baxter III", "", "yage.resource.dds", "Zlib/LibPng"),
-		    Credit("Michael Parker and Others", "Aldacron", "Derelict", "BSD"),
-		    Credit("Walter Bright and others", "", "The D Programming Language", ""),
-		    Credit("Tango Developers", "", "The Tango Library", "Academic Free License v3.0 or BSD License"),
-		    Credit("FreeType Developers", "", "FreeType Project", "FreeType License or GPL"),
-		    Credit("Xiph Foundation", "", "Ogg/Vorbis", "BSD"),
-		    Credit("Jean-Loup Gailly and Mark Adler", "", "ZLib", "Zlib/LibPng"),
-		    Credit("LibPng Developers", "", "LibPng", "Zlib/LibPng"),
-		    Credit("Independent JPEG Group", "", "Jpeg", "This software is based in part on the work of the Independent JPEG Group."),
-		    Credit("Sam Lantiga and others", "", "SDL", "LGPL"),
-		    Credit("Sam Lantinga and Mattias Engdegård", "", "SDL_Image", "LGPL"),
-		    Credit("Eric Poggel", "JoeCoder", "everything else", "LGPL v3")
-		];
-	}
-
+Credit[] getCredits()
+{
+	return [
+	    Credit("Eric Poggel", "JoeCoder", "Original Yage engine", "LGPL v3")
+	];
 }
