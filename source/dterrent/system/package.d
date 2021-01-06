@@ -10,4 +10,5 @@ public
 {
 	import dterrent.system.system;
 	import dterrent.system.logger;
+	import dterrent.system.sound;
 }
