@@ -6,11 +6,11 @@
  */
 
 module dterrent.system.system;
+import dterrent.system.logger;
 
 import core.thread.osthread;
-import dterrent.system.logger;
-import std.experimental.logger; //to use global sharedLog
 import libloader = dterrent.system.libloader;
+import dterrent.system.sound.openal;
 
 /+
 import std.range;
@@ -52,7 +52,8 @@ void init()
 
     if (libloader.isOpenALLoaded())
     {
-        info("openALLoaded");
+        //uint* buffers; TEST OK
+        //OpenAL.genBuffers(10, buffers); TEST OK
         // Create OpenAL device, context, and start sound processing thread.
         //SoundContext.init();
     }

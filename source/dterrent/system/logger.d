@@ -3,10 +3,10 @@
 	Copyright: proprietary / contact dev
 
  */
- 
+
 module dterrent.system.logger;
 
-import std.experimental.logger;
+public import std.experimental.logger; //to use global sharedLog
 import dterrent.system.consolelogger;
 
 

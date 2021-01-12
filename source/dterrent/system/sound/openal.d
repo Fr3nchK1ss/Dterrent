@@ -5,24 +5,29 @@
  */
 
 module dterrent.system.sound.openal;
+import dterrent.system.logger;
+
+import std.exception : enforce;
+import std.traits : fullyQualifiedName, ReturnType, Parameters;
 
 import bindbc.openal;
+
+
 /*
 import tango.core.Traits;
 import yage.core.misc;
-import yage.core.object2;
 import yage.system.sound.soundsystem;
 */
+
 
 /**
  * Create a wrapper around all OpenAL functions providing the following additional features:
  *
- * Error results from each openal call are checked.$(BR)
+ * Error results from each openal call are checked.
  * On error, an exception is thrown with the OpenAL error code translated to a meaningful string. */
 class OpenAL
 {
 	static string[int] ALErrorLookup;
-	static Object mutex;
 
 	// Initialize static variables
 	static this ()
@@ -35,83 +40,79 @@ class OpenAL
 			0xA004: "AL_INVALID_OPERATION",
 			0xA005: "AL_OUT_OF_MEMORY"
 		];
-		mutex = new Object();
         import std.stdio;
 		writeln("openal static this");
 	}
-/+
-	/*
-	 * Create a wrapper around any OpenAL function.
-	 * ReturnType execute(FunctionName)(Arguments ...);*/
-	static R execute(alias T, R=ReturnTypeOf!(typeof(T)))(ParameterTupleOf!(typeof(T)) args)
-	in {
-		if (T.stringof[0..3] != "alc") // all non-alc functions require an active OpenAL Context
-			assert(SoundContext.getContext());
-	}
-	body
-	{	int error = alGetError(); // clear any previous errors.
 
-		// Check to see if an OpenAL error was set.
-		void checkError()
-		{	error = alGetError();
-			if (error != AL_NO_ERROR)
-				throw new OpenALException("OpenAL %s error %s", T.stringof, OpenAL.ALErrorLookup[error]);
-		}
+    synchronized
+    static void execute(alias FUNC)(Parameters!FUNC func_args)
+    in {
+        /*
+        if (FUNC.stringof[0..3] != "alc") // all non-alc functions require an active OpenAL Context
+            assert(SoundContext.getContext());
+            */
+    }
+    do
+    {
+        int error = alGetError(); // clear any previous errors.
 
-		// Call the function
-		try {
-			static if (is (R==void))
-			{	T(args);
-				if (T.stringof[0..3] != "alc") // TODO can be static if.
-					checkError();
-			}
-			else
-			{	R result = T(args);
-				if (T.stringof[0..3] == "alc") // can't use alGetError for alc functions.
-				{	if (!result)
-						throw new OpenALException("OpenAL %s error. %s returned null.", T.stringof, T.stringof);
-				} else
-					checkError();
-				return result;
-			}
-		} catch (OpenALException e)
-		{	throw e;
-		} catch (Exception e)
-		{	throw new OpenALException("OpenAL %s error. %s threw an exception with message '%s'", T.stringof, T.stringof, e);
-		}
-	}
+        void checkError()
+        {
+            error = alGetError();
+            enforce (error == AL_NO_ERROR,
+                     "OpenAL: " ~ fullyQualifiedName!(FUNC) ~ ": " ~ OpenAL.ALErrorLookup[error]);
+            info("yeaaah");
+        }
 
-	/**
-	 * Get an OpenAL mutex to ensure that no two threads ever execute OpenAL functionality simultaneously. */
-	static Object getMutex()
-	{	return mutex;
-	}
+        // Call FUNC
+        static if (is (ReturnType!FUNC == void))
+        {
+            FUNC(func_args);
+            if (FUNC.stringof[0..3] != "alc") // TODO can be static if.
+                checkError();
+        }
+        /*
+        else
+        {
+            R result = T(args);
+            if (T.stringof[0..3] == "alc") // can't use alGetError for alc functions.
+            {	if (!result)
+                    throw new OpenALException("OpenAL %s error. %s returned null.", T.stringof, T.stringof);
+            } else
+                checkError();
+            return result;
+        }
+        */
+
+
+    }
 
 	/**
-	 * Wrappers for each OpenAL function (unfinished). */
-	alias execute!(alBufferData) bufferData; /// ditto
-	alias execute!(alDeleteBuffers) deleteBuffers; /// ditto
-	alias execute!(alDeleteSources) deleteSources; /// ditto
-	alias execute!(alGenBuffers) genBuffers; /// ditto
-	alias execute!(alGenSources) genSources; /// ditto
-	alias execute!(alGetSourcef) getSourcef; /// ditto
-	alias execute!(alGetSourcei) getSourcei; /// ditto
-	alias execute!(alIsBuffer) isBuffer; /// ditto
-	alias execute!(alListenerfv) listenerfv; /// ditto
-	alias execute!(alSourcef) sourcef; /// ditto
-	alias execute!(alSourcefv) sourcefv; /// ditto
-	alias execute!(alSourcePlay) sourcePlay; /// ditto
-	alias execute!(alSourcePause) sourcePause; /// ditto
-	alias execute!(alSourceQueueBuffers) sourceQueueBuffers; /// ditto
-	alias execute!(alSourceStop) sourceStop; /// ditto
-	alias execute!(alSourceUnqueueBuffers) sourceUnqueueBuffers; /// ditto
+	 * Wrappers for each OpenAL function (unfinished).
+     */
+	alias bufferData = execute!(alBufferData) ; /// ditto
+	alias deleteBuffers = execute!(alDeleteBuffers) ; /// ditto
+	alias deleteSources = execute!(alDeleteSources) ; /// ditto
+	alias genBuffers = execute!(alGenBuffers) ; /// ditto
+	alias genSources = execute!(alGenSources); /// ditto
+	alias getSourcef = execute!(alGetSourcef); /// ditto
+	alias getSourcei = execute!(alGetSourcei); /// ditto
+	alias isBuffer = execute!(alIsBuffer) ; /// ditto
+	alias listenerfv = execute!(alListenerfv) ; /// ditto
+	alias sourcef = execute!(alSourcef) ; /// ditto
+	alias sourcefv = execute!(alSourcefv) ; /// ditto
+	alias sourcePlay = execute!(alSourcePlay) ; /// ditto
+	alias sourcePause = execute!(alSourcePause) ; /// ditto
+	alias sourceQueueBuffers = execute!(alSourceQueueBuffers) ; /// ditto
+	alias sourceStop = execute!(alSourceStop) ; /// ditto
+	alias sourceUnqueueBuffers = execute!(alSourceUnqueueBuffers) ; /// ditto
 
-	alias execute!(alcCloseDevice) closeDevice; /// ditto
-	alias execute!(alcCreateContext) createContext; /// ditto
-	alias execute!(alcDestroyContext) destroyContext; /// ditto
-	alias execute!(alcGetIntegerv) getIntegerv; /// ditto
-	alias execute!(alcGetString) getString; /// ditto
-	alias execute!(alcMakeContextCurrent) makeContextCurrent; /// ditto
-	alias execute!(alcOpenDevice) openDevice; /// ditto
-+/
+	alias closeDevice = execute!(alcCloseDevice) ; /// ditto
+	alias createContext = execute!(alcCreateContext) ; /// ditto
+	alias destroyContext = execute!(alcDestroyContext) ; /// ditto
+	alias getIntegerv = execute!(alcGetIntegerv) ; /// ditto
+	alias getString = execute!(alcGetString) ; /// ditto
+	alias makeContextCurrent = execute!(alcMakeContextCurrent) ; /// ditto
+	alias openDevice = execute!(alcOpenDevice) ; /// ditto
+
 }

@@ -4,15 +4,11 @@
 
 	dterrent package
  */
- 
+
 module dterrent;
 
-public
-{
-	import dterrent.core;
-	import dterrent.system;
+public import dterrent.core,
+              dterrent.system;
 /*	import dterrent.resource;
 	import dterrent.scene;
 	import dterrent.gui;*/
-}
-

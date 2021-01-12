@@ -5,8 +5,7 @@
  */
 
 module dterrent.system.libloader;
-
-import std.experimental.logger;
+import dterrent.system.logger;
 
 /* All the libs used by Dterrent */
 import bindbc.sdl;

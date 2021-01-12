@@ -6,9 +6,6 @@
 
 module dterrent.system;
 
-public
-{
-	import dterrent.system.system;
-	import dterrent.system.logger;
-	import dterrent.system.sound;
-}
+public import dterrent.system.system,
+              dterrent.system.logger,
+              dterrent.system.sound;
