@@ -1,7 +1,6 @@
 .dub
 docs.json
 __dummy.html
-docs/
 /dterrent
 dterrent.so
 dterrent.dylib
@@ -18,4 +17,5 @@ dterrent-test-*
 *.selections.json
 Diamond-master
 bin
+gfm
 

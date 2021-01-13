@@ -9,5 +9,5 @@ module dterrent.system.sound;
 public
 {
 	import dterrent.system.sound.openal;
-	//import dterrent.system.sound.soundsystem;
+	import dterrent.system.sound.soundsystem;
 }

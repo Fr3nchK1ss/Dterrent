@@ -4,10 +4,10 @@
 
  */
 
-module dterrent.system.logger;
+module dterrent.system.logger.teelogger;
 
 public import std.experimental.logger; //to use global sharedLog
-import dterrent.system.consolelogger;
+import dterrent.system.logger.consolelogger;
 
 
 /**

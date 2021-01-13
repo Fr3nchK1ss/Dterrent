@@ -6,7 +6,7 @@
  as of 10/2020
 */
 
-module dterrent.system.consolelogger;
+module dterrent.system.logger.consolelogger;
 
 import std.experimental.logger;
 

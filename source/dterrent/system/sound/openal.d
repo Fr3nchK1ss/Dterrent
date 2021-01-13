@@ -10,7 +10,7 @@ import dterrent.system.logger;
 import std.exception : enforce;
 import std.traits : fullyQualifiedName, ReturnType, Parameters;
 
-import bindbc.openal;
+public import bindbc.openal;
 
 
 /*
@@ -44,47 +44,44 @@ class OpenAL
 		writeln("openal static this");
 	}
 
-    synchronized
-    static void execute(alias FUNC)(Parameters!FUNC func_args)
-    in {
-        /*
-        if (FUNC.stringof[0..3] != "alc") // all non-alc functions require an active OpenAL Context
-            assert(SoundContext.getContext());
-            */
-    }
-    do
+
+    /**
+     * wrapper around OpenAL functions
+     */
+    synchronized static R execute(alias FUNC, R=ReturnType!FUNC)(Parameters!FUNC func_args)
     {
         int error = alGetError(); // clear any previous errors.
 
         void checkError()
         {
+                        info("Checking for al error");// TODO: remove
             error = alGetError();
             enforce (error == AL_NO_ERROR,
                      "OpenAL: " ~ fullyQualifiedName!(FUNC) ~ ": " ~ OpenAL.ALErrorLookup[error]);
-            info("yeaaah");
         }
 
         // Call FUNC
-        static if (is (ReturnType!FUNC == void))
+        static if (is (R == void))
         {
             FUNC(func_args);
-            if (FUNC.stringof[0..3] != "alc") // TODO can be static if.
+            static if (FUNC.stringof[0..3] != "alc")
                 checkError();
         }
-        /*
         else
         {
-            R result = T(args);
-            if (T.stringof[0..3] == "alc") // can't use alGetError for alc functions.
-            {	if (!result)
-                    throw new OpenALException("OpenAL %s error. %s returned null.", T.stringof, T.stringof);
-            } else
+            R result = FUNC(func_args);
+            info(FUNC.stringof[0..3]);// TODO: remove
+            static if (FUNC.stringof[0..3] == "alc") // can't use alGetError for alc functions.
+            {
+                enforce(!result,
+                        "OpenAL: " ~ fullyQualifiedName!(FUNC) ~ " returned null instead
+                        of a valid " ~ R.stringof);
+            }
+            else
                 checkError();
+
             return result;
         }
-        */
-
-
     }
 
 	/**
