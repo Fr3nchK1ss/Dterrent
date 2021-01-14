@@ -11,7 +11,7 @@ Dterrent tries to salvage the defunct yage3D project, at least its architecture,
 * derelict		-> bindbc (bindings to SDL2)
 * tango.core.Thread	-> core.thread.osthread
 * yage.system.log	-> std.experimental.logger, console-logger
-* yage.core.math       -> gfm.math
+* yage.core.math       -> gl3n
 * ...
 
 

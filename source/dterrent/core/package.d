@@ -6,4 +6,5 @@
 
 module dterrent.core;
 
-public import dterrent.core.interfaces;
+public import dterrent.core.interfaces,
+              dterrent.core.math;

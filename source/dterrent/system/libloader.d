@@ -41,7 +41,7 @@ mixin template mxtpl_logResult(E, E validVersion, string libName)
     		}
         }
         else
-            infof (libName ~" version %s loaded", libVersion);
+            tracef (libName ~" version %s loaded", libVersion);
 	}
 
 }
@@ -77,6 +77,8 @@ void loadAll() {
     mixin mxtpl_logResult!(FTSupport, ftSupport, "FreeType");
     logResult( loadFreeType(), LogLevel.warning );
 
+    import std.stdio: writeln;
+    writeln("");
 }
 
 bool isOpenALLoaded()

@@ -9,12 +9,16 @@ import dterrent.system.logger;
 
 import std.exception : enforce;
 import std.string;
-import dterrent.gfm.math;
+import std.math: floor;
+import std.algorithm: max;
+import std.conv: to;
+
+import gl3n.linalg; //vec3
 import dterrent.core.interfaces;
 import dterrent.system.sound.openal;
+import dterrent.resource.sound;
 
 /*
-import tango.math.Math;
 import tango.util.Convert;
 import tango.core.Thread;
 import tango.core.Traits;
@@ -30,7 +34,6 @@ import yage.scene.sound;
 import yage.resource.sound;
 */
 
-
 /**
  * This class is used internally by the engine and shouldn't need to be used manually.
  *
@@ -44,7 +47,6 @@ class SoundContext
 	private static const int UPDATE_FREQUENCY = 30;	// arbitrary
     private static SoundSource[] sources;
 
-	private static ALCdevice* device = null;
 	private static ALCcontext* context = null;
 
 	/**
@@ -53,7 +55,7 @@ class SoundContext
 	public static void init()
 	{
 		// Get a device
-		device = OpenAL.openDevice(null);
+		device = OpenAL.openDevice(null); // is a package variable defined in openal.d
 		info("Using OpenAL Device '%s'.", fromStringz(OpenAL.getString(device, ALC_DEVICE_SPECIFIER)));
 
 		// Get a context
@@ -90,8 +92,8 @@ class SoundContext
                 foreach (source; sources)
 					if (source) // in case of the unpredictible order of the gc.
 						source.dispose();
-				sources = null;
 
+				sources = null;
 				OpenAL.makeContextCurrent(null);
 				OpenAL.destroyContext(context);
 				OpenAL.closeDevice(device);
@@ -182,15 +184,15 @@ private class SoundSource : IDisposable
 	package uint al_source;
 /+
 	private SoundNode soundNode;	// It would be good if this became unnecessary.  It's currently required to set the playback timer.
-
-	private Sound sound;
 +/
+	private Sound sound;
+
 	private float  pitch;
 	private float  radius;			// The radius of the Sound that plays.
 	private float  volume;
 	private bool   looping = false;
-	private vec3f  position;
-	private vec3f  velocity;
+	private vec3  position;
+	private vec3  velocity;
 
 	private ulong  size;			// number of buffers that we use at one time, either sounds' buffers per second,
 									// or less if the sound is less than one second long.
@@ -302,7 +304,7 @@ private class SoundSource : IDisposable
 			soundNode = null;
 		}
 	}
-
++/
 	/*
 	 * Seek to the position in the track.  Seek has a precision of .05 seconds.
 	 * @throws OpenALException if the value is outside the range of the Sound. */
@@ -311,12 +313,13 @@ private class SoundSource : IDisposable
 		int buffers_per_second = sound.getBuffersPerSecond();
 		int new_start = cast(int)floor(seconds*buffers_per_second);
 		float fraction = seconds*buffers_per_second - new_start;
-		if (new_start > sound.getBuffersLength())
-			throw new OpenALException("SoundSource.seek(%f) is invalid for '%s'", seconds, sound.getSource());
+        enforce (new_start <= sound.getBuffersLength(),
+			     "SoundSource.seek(" ~ to!string(seconds) ~ ") is invalid for ''" ~ sound.getSource() ~ "'.");
 
 		// Delete any leftover buffers
-		synchronized(OpenAL.getMutex())
-		{	OpenAL.sourceStop(al_source);
+		synchronized
+		{
+            OpenAL.sourceStop(al_source);
 			unqueueBuffers();
 			buffer_start = buffer_end = new_start;
 			enqueue = true;
@@ -326,7 +329,7 @@ private class SoundSource : IDisposable
 		}
 		// Stdout.format("seeked to ", (new_start+fraction)/buffers_per_second);
 	}
-
+/+
 	/*
 	 * Tell the position of the playback of the current sound file, in seconds. */
 	double tell()
@@ -338,7 +341,7 @@ private class SoundSource : IDisposable
 		return ((buffer_start + processed) % sound.getBuffersLength()) /
 			cast(double)sound.getBuffersPerSecond();
 	}
-
++/
 	/*
 	 * Enqueue new buffers for this SoundNode to play
 	 * Takes into account pausing, looping and all kinds of other things.
@@ -346,13 +349,14 @@ private class SoundSource : IDisposable
 	 * This will fail silently if the SoundNode has no sound or no scene. */
 	void updateBuffers()
 	in {
-		assert(soundNode);
+		//assert(soundNode);
 		assert(sound);
 	}
-	body
+	do
 	{
-		synchronized(OpenAL.getMutex())
-		{	if (enqueue)
+		synchronized
+		{
+            if (enqueue)
 			{
 				//Stdout.format("updating buffers for %s", sound.getSource());
 				// Count buffers processed since last time we queue'd more
@@ -417,12 +421,14 @@ private class SoundSource : IDisposable
 	private void unqueueBuffers()
 	{
 		if (sound)
-		{	synchronized(OpenAL.getMutex())
-			{	int processed;
+		{	synchronized
+			{
+                int processed;
 				OpenAL.getSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
 				OpenAL.sourceUnqueueBuffers(al_source, processed, sound.getBuffers(buffer_start, buffer_start+processed).ptr);
 				sound.freeBuffers(buffer_start, processed);
-		}	}
+    		}
+        }
 	}
-+/
+
 }

@@ -8,8 +8,7 @@
 module dterrent;
 
 public import dterrent.core,
-              dterrent.system,
-              dterrent.gfm.math;
+              dterrent.system;
 /*	import dterrent.resource;
 	import dterrent.scene;
 	import dterrent.gui;*/

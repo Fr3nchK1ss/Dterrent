@@ -7,78 +7,103 @@
 module dterrent.system.sound.openal;
 import dterrent.system.logger;
 
-import std.exception : enforce;
 import std.traits : fullyQualifiedName, ReturnType, Parameters;
-
+import std.conv : to;
 public import bindbc.openal;
 
-
-/*
-import tango.core.Traits;
-import yage.core.misc;
-import yage.system.sound.soundsystem;
-*/
-
+package(dterrent.system.sound) ALCdevice* device = null;
 
 /**
- * Create a wrapper around all OpenAL functions providing the following additional features:
- *
- * Error results from each openal call are checked.
- * On error, an exception is thrown with the OpenAL error code translated to a meaningful string. */
+ * Class to bundle OpenAL
+ */
 class OpenAL
 {
-	static string[int] ALErrorLookup;
-
-	// Initialize static variables
-	static this ()
-	{	ALErrorLookup = [
-			0xA001: "AL_INVALID_NAME"[],
-			0xA002: "AL_ILLEGAL_ENUM",
-			0xA002: "AL_INVALID_ENUM",
-			0xA003: "AL_INVALID_VALUE",
-			0xA004: "AL_ILLEGAL_COMMAND",
-			0xA004: "AL_INVALID_OPERATION",
-			0xA005: "AL_OUT_OF_MEMORY"
-		];
-        import std.stdio;
-		writeln("openal static this");
-	}
-
 
     /**
-     * wrapper around OpenAL functions
+     * wrapper around OpenAL functions in order to add error checking
      */
     synchronized static R execute(alias FUNC, R=ReturnType!FUNC)(Parameters!FUNC func_args)
     {
-        int error = alGetError(); // clear any previous errors.
-
-        void checkError()
+        /**
+         * (Nested) Check for error with a regular al call
+         */
+        void checkAlError()
         {
-                        info("Checking for al error");// TODO: remove
-            error = alGetError();
-            enforce (error == AL_NO_ERROR,
-                     "OpenAL: " ~ fullyQualifiedName!(FUNC) ~ ": " ~ OpenAL.ALErrorLookup[error]);
+            int error = alGetError();
+            if(error != AL_NO_ERROR)
+            {
+                final switch(error)
+                {
+                    case AL_INVALID_NAME:
+                        critical("AL_INVALID_NAME: a bad name (ID) was passed\n");
+                        break;
+                    case AL_INVALID_ENUM:
+                        critical("AL_INVALID_ENUM: an invalid enum value was passed\n");
+                        break;
+                    case AL_INVALID_VALUE:
+                        critical("AL_INVALID_VALUE: an invalid value was passed\n");
+                        break;
+                    case AL_INVALID_OPERATION:
+                        critical("AL_INVALID_OPERATION: the requested operation is not valid\"\n");
+                        break;
+                    case AL_OUT_OF_MEMORY:
+                        critical("AL_OUT_OF_MEMORY: the requested operation resulted in OpenAL running out of memory\n");
+                        break;
+                }
+            }
         }
+
+        /**
+         * (Nested) for error with an al context call
+         */
+        void checkAlcError(ALCdevice* device)
+        {
+            int error = alcGetError(device);
+            if(error != ALC_NO_ERROR)
+            {
+                final switch(error)
+                {
+                    case ALC_INVALID_VALUE:
+                        critical ("ALC_INVALID_VALUE: an invalid value was passed\n");
+                        break;
+                    case ALC_INVALID_DEVICE:
+                        critical ("ALC_INVALID_DEVICE: a bad device was passed\n");
+                        break;
+                    case ALC_INVALID_CONTEXT:
+                        critical ("ALC_INVALID_CONTEXT: a bad context was passed\n");
+                        break;
+                    case ALC_INVALID_ENUM:
+                        critical ("ALC_INVALID_ENUM: an unknown enum value was passed\n");
+                        break;
+                    case ALC_OUT_OF_MEMORY:
+                        critical ("ALC_OUT_OF_MEMORY: an unknown enum value was passed\n");
+                        break;
+                }
+            }
+        }
+
+        //info ( "OpenAL: Executing " ~ fullyQualifiedName!(FUNC) ~ " \n");
+        alGetError(); // clear any previous errors.
 
         // Call FUNC
         static if (is (R == void))
         {
             FUNC(func_args);
             static if (FUNC.stringof[0..3] != "alc")
-                checkError();
+                checkAlError();
+            else
+                checkAlcError(device);
         }
         else
         {
             R result = FUNC(func_args);
-            info(FUNC.stringof[0..3]);// TODO: remove
-            static if (FUNC.stringof[0..3] == "alc") // can't use alGetError for alc functions.
-            {
-                enforce(!result,
-                        "OpenAL: " ~ fullyQualifiedName!(FUNC) ~ " returned null instead
-                        of a valid " ~ R.stringof);
-            }
+
+            //trace( FUNC.stringof ~" returned: " ~ R.stringof ~ " " ~ to!string(result));
+
+            static if (FUNC.stringof[0..3] != "alc")
+                checkAlError();
             else
-                checkError();
+                checkAlcError(null);
 
             return result;
         }

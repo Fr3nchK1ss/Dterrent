@@ -10,22 +10,17 @@ import dterrent.system.logger;
 
 import core.thread.osthread;
 import libloader = dterrent.system.libloader;
-import dterrent.system.sound.openal;
+import dterrent.system.sound;
 
 /+
 import std.range;
-
-import tango.stdc.stringz;
 import tango.core.Memory;
 
 import derelict.opengl3.gl;
 import derelict.opengl3.ext;
 import derelict.util.exception;
 
-import yage.core.all;
 import yage.gui.surface;
-
-import yage.system.sound.soundsystem;
 import yage.system.graphics.all;
 import yage.core.object2;
 import yage.core.math.vector;
@@ -52,10 +47,8 @@ void init()
 
     if (libloader.isOpenALLoaded())
     {
-        //uint* buffers; TEST OK
-        //OpenAL.genBuffers(10, buffers); TEST OK
         // Create OpenAL device, context, and start sound processing thread.
-        //SoundContext.init();
+        SoundContext.init();
     }
 
 	stopWatch.stop();
@@ -74,12 +67,13 @@ void stop()
      */
 	assert(system_thread && Thread.getThis() == system_thread);
 
-    /*
+	SoundContext.deInit(); // stop the sound thread
+    /+
 	// TODO FIX THIS
 	//SDL_WM_GrabInput(SDL_GRAB_OFF);
 	SDL_ShowCursor(true);
 
-	SoundContext.deInit(); // stop the sound thread
+
 
 	foreach ( s; retro (Scene.getAllScenes().values) )
 		s.dispose();
@@ -94,7 +88,7 @@ void stop()
 	// TODO: This shouldn't be needed to force any calls to dispose.
 	//GC.collect(); // Crashes when called in debug mode
 
-    */
+    +/
 
     libloader.unloadAll();
 
