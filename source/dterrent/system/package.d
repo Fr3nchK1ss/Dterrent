@@ -1,5 +1,5 @@
 /**
-	Authors: ludo456 on github
+	Authors: Fr3nchK1ss on github
 	Copyright: proprietary / contact dev
 
  */

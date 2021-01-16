@@ -1,10 +1,10 @@
-# Dterrent ![D](https://github.com/ludo456/Dterrent/workflows/D/badge.svg)
+# Dterrent ![D](https://github.com/Fr3nchK1ss/Dterrent/workflows/D/badge.svg)
 
-Minimalist game engine in D (Digital Mars). Intended for Linux.
+Minimalist game engine in D (Dlang). Intended for Linux.
 
-Dterrent tries to salvage the defunct yage3D project, at least its architecture, ideally replacing most of the former components with D2 features or Dub packages. In this aspect, it is a proof of concept for a 3D engine built upon community-made "building bricks", without reinventing the wheel.
+Dterrent tries to salvage the defunct yage3D project by JoeCoder, at least its architecture, ideally replacing most of the former components with D2 features or Dub packages. In this aspect, it is a proof of concept for a 3D engine built upon Dlang community-made "building bricks", without reinventing the wheel.
 
-*Note: ludo456 was a contributor to the original yage3D project.*
+*Note: Fr3nchK1ss was an original contributor to the yage3D project.*
 
 ## Current libs changes
 

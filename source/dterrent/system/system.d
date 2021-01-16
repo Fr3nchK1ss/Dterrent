@@ -1,5 +1,5 @@
 /**
-	Authors: ludo456 on github
+	Authors: Fr3nchK1ss on github
 	Copyright: proprietary / contact dev
 
 	This class is a rewrite of yage3D System class.
@@ -113,6 +113,7 @@ struct Credit
 Credit[] getCredits()
 {
 	return [
-	    Credit("Eric Poggel", "JoeCoder", "Original Yage engine", "LGPL v3")
+	    Credit("Eric Poggel", "JoeCoder", "Original Yage engine", "LGPL v3"),
+        Credit("Fr3nchK1ss","Fr3nchK1ss", "Dterrent engine", "LGLP v3"),
 	];
 }
