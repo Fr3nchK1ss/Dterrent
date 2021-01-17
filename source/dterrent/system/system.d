@@ -8,7 +8,7 @@
 module dterrent.system.system;
 import dterrent.system.logger;
 
-import core.thread.osthread;
+import std.concurrency;
 import libloader = dterrent.system.libloader;
 import dterrent.system.sound;
 
@@ -30,7 +30,9 @@ import yage.system.window;
 +/
 
 
-Thread system_thread; 		// reference to thread that called init, typically the main thread
+Tid system_thread; 		// reference to thread that called init, typically the main thread
+bool isSoundON = true;
+
 
 /* Load external libs */
 void init()
@@ -40,15 +42,19 @@ void init()
 
 	// Init variables
 	sharedLog = new DtrtLogger(); // is a global
-	system_thread = Thread.getThis();
+	system_thread = thisTid();
 
 	// Load external libraries
 	libloader.loadAll();
 
     if (libloader.isOpenALLoaded())
     {
-        // Create OpenAL device, context, and start sound processing thread.
-        SoundContext.init();
+        try{
+            // Create OpenAL device, context, and start sound processing thread.
+            SoundContext.init();
+        } catch (OpenALException e){
+            isSoundON = false;
+        }
     }
 
 	stopWatch.stop();
@@ -65,7 +71,7 @@ void stop()
      * The assert is useful to ensure that rendering functions aren't called from
      * other threads. Always returns false if called before System.init()
      */
-	assert(system_thread && Thread.getThis() == system_thread);
+	assert(thisTid() == system_thread);
 
 	SoundContext.deInit(); // stop the sound thread
     /+
@@ -114,6 +120,6 @@ Credit[] getCredits()
 {
 	return [
 	    Credit("Eric Poggel", "JoeCoder", "Original Yage engine", "LGPL v3"),
-        Credit("Fr3nchK1ss","Fr3nchK1ss", "Dterrent engine", "LGLP v3"),
+        Credit("Fr3nchK1ss", "Fr3nchK1ss", "Dterrent engine", "LGLP v3"),
 	];
 }

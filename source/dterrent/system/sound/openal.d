@@ -13,16 +13,24 @@ public import bindbc.openal;
 
 package(dterrent.system.sound) ALCdevice* device = null;
 
+
+class OpenALException : Exception
+{
+    this (string msg) {
+        super(msg);
+    }
+}
+
+
 /**
  * Class to bundle OpenAL
  */
 class OpenAL
 {
-
     /**
      * wrapper around OpenAL functions in order to add error checking
      */
-    synchronized static R execute(alias FUNC, R=ReturnType!FUNC)(Parameters!FUNC func_args)
+    static R execute(alias FUNC, R=ReturnType!FUNC)(Parameters!FUNC func_args)
     {
         /**
          * (Nested) Check for error with a regular al call
@@ -50,6 +58,7 @@ class OpenAL
                         critical("AL_OUT_OF_MEMORY: the requested operation resulted in OpenAL running out of memory\n");
                         break;
                 }
+                throw new OpenALException("OpenAL failure");
             }
         }
 
@@ -79,6 +88,7 @@ class OpenAL
                         critical ("ALC_OUT_OF_MEMORY: an unknown enum value was passed\n");
                         break;
                 }
+                throw new OpenALException("OpenAL context failure");
             }
         }
 
@@ -103,7 +113,7 @@ class OpenAL
             static if (FUNC.stringof[0..3] != "alc")
                 checkAlError();
             else
-                checkAlcError(null);
+                checkAlcError(device);
 
             return result;
         }
@@ -128,7 +138,7 @@ class OpenAL
 	alias sourceQueueBuffers = execute!(alSourceQueueBuffers) ; /// ditto
 	alias sourceStop = execute!(alSourceStop) ; /// ditto
 	alias sourceUnqueueBuffers = execute!(alSourceUnqueueBuffers) ; /// ditto
-
+    // Context aliases
 	alias closeDevice = execute!(alcCloseDevice) ; /// ditto
 	alias createContext = execute!(alcCreateContext) ; /// ditto
 	alias destroyContext = execute!(alcDestroyContext) ; /// ditto

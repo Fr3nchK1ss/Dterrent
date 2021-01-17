@@ -55,8 +55,8 @@ class SoundContext
 	public static void init()
 	{
 		// Get a device
-		device = OpenAL.openDevice(null); // is a package variable defined in openal.d
-		info("Using OpenAL Device '%s'.", fromStringz(OpenAL.getString(device, ALC_DEVICE_SPECIFIER)));
+		device = OpenAL.openDevice(null); // device is a package variable defined in openal.d
+		infof("Using OpenAL Device '%s'.", fromStringz(OpenAL.getString(device, ALC_DEVICE_SPECIFIER)));
 
 		// Get a context
 		context = OpenAL.createContext(device, null);
@@ -78,6 +78,7 @@ class SoundContext
 				auto source = new SoundSource();
 				sources ~= source;
 		}
+
 	}
 
 
@@ -88,17 +89,16 @@ class SoundContext
 	{
 		if (context)
 		{
-            synchronized {
-                foreach (source; sources)
-					if (source) // in case of the unpredictible order of the gc.
-						source.dispose();
 
-				sources = null;
-				OpenAL.makeContextCurrent(null);
-				OpenAL.destroyContext(context);
-				OpenAL.closeDevice(device);
-				context = device = null;
-			}
+            foreach (source; sources)
+				if (source) // in case of the unpredictible order of the gc.
+					source.dispose();
+
+			sources = null;
+			OpenAL.makeContextCurrent(null);
+			OpenAL.destroyContext(context);
+			OpenAL.closeDevice(device);
+			context = device = null;
 		}
 	}
 
@@ -317,16 +317,18 @@ private class SoundSource : IDisposable
 			     "SoundSource.seek(" ~ to!string(seconds) ~ ") is invalid for ''" ~ sound.getSource() ~ "'.");
 
 		// Delete any leftover buffers
-		synchronized
-		{
-            OpenAL.sourceStop(al_source);
-			unqueueBuffers();
-			buffer_start = buffer_end = new_start;
-			enqueue = true;
-			updateBuffers();
-			OpenAL.sourcePlay(al_source);
-			OpenAL.sourcef(al_source, AL_SEC_OFFSET, fraction/buffers_per_second);
-		}
+
+        OpenAL.sourceStop(al_source);
+
+        synchronized
+        {
+        	unqueueBuffers();
+        	buffer_start = buffer_end = new_start;
+        	enqueue = true;
+        	updateBuffers();
+        }
+		OpenAL.sourcePlay(al_source);
+		OpenAL.sourcef(al_source, AL_SEC_OFFSET, fraction/buffers_per_second);
 		// Stdout.format("seeked to ", (new_start+fraction)/buffers_per_second);
 	}
 /+

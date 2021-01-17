@@ -154,7 +154,7 @@ class Sound
 			// If this buffer hasn't yet been bound
 			if (buffers_ref[i]==0)
 			{
-				//synchronized(ALContext.getMutex())
+				synchronized
 				{	OpenAL.genBuffers(1, &buffers[i]);
 					ubyte[] data = sound_file.getBuffer(i*buffer_size, buffer_size);
 					OpenAL.bufferData(buffers[i], al_format, &data[0], cast(ALsizei)data.length, getFrequency());
