@@ -12,6 +12,7 @@ import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.openal;
 import bindbc.freetype;
+import bindbc.opengl;
 
 
 /* Mixins declarations */
@@ -34,11 +35,13 @@ mixin template mxtpl_logResult(E, E validVersion, string libName)
     		}
     		else if ( libVersion == E.noLibrary ) {
     			/* e.g., an SDL 2.0.2 library loaded by an SDL 2.0.10 configuration.*/
-    			log(level, "The system was able to find and successfully load " ~ libName
+    		          log(level, "The system was able to find and successfully load " ~ libName
     						~" but one or more symbols were missing."
     						~" This usually indicates that the loaded library is of a lower API"
     						~" version than expected.");
     		}
+            else
+                log(level, libName ~" failed to load.\n");
         }
         else
             tracef (libName ~" version %s loaded", libVersion);
@@ -81,10 +84,18 @@ void loadAll() {
     writeln("");
 }
 
+void loadOpenGL()
+{
+    mixin mxtpl_logResult!(GLSupport, GLSupport.gl43, "OpenGL");
+    logResult( bindbc.opengl.loadOpenGL(), LogLevel.fatal );
+}
+
+
 bool isOpenALLoaded()
 {
     return bindbc.openal.isOpenALLoaded();
 }
+
 
 void unloadAll(){
     /*

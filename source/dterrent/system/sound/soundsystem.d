@@ -13,7 +13,7 @@ import std.math: floor;
 import std.algorithm: max;
 import std.conv: to;
 
-import gl3n.linalg; //vec3
+import gl3n.linalg;
 import dterrent.core.interfaces;
 import dterrent.system.sound.openal;
 import dterrent.resource.sound;
@@ -51,7 +51,7 @@ class SoundContext
 
 	/**
 	 * Create a device, a context, and start a thread that automatically updates all sound buffers.
-	 * To get an instance, use SoundContext.getInstance(). */
+	 */
 	public static void init()
 	{
 		// Get a device
@@ -320,13 +320,11 @@ private class SoundSource : IDisposable
 
         OpenAL.sourceStop(al_source);
 
-        synchronized
-        {
-        	unqueueBuffers();
-        	buffer_start = buffer_end = new_start;
-        	enqueue = true;
-        	updateBuffers();
-        }
+    	unqueueBuffers();
+    	buffer_start = buffer_end = new_start;
+    	enqueue = true;
+    	updateBuffers();
+
 		OpenAL.sourcePlay(al_source);
 		OpenAL.sourcef(al_source, AL_SEC_OFFSET, fraction/buffers_per_second);
 		// Stdout.format("seeked to ", (new_start+fraction)/buffers_per_second);
@@ -356,65 +354,63 @@ private class SoundSource : IDisposable
 	}
 	do
 	{
-		synchronized
+        if (enqueue)
 		{
-            if (enqueue)
+			//Stdout.format("updating buffers for %s", sound.getSource());
+			// Count buffers processed since last time we queue'd more
+			int processed;
+			OpenAL.getSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
+			to_process = max(processed, size-(buffer_end-buffer_start));
+
+			// Update the buffers for this source if more than 1/4th have been used.
+			if (to_process > size/4)
 			{
-				//Stdout.format("updating buffers for %s", sound.getSource());
-				// Count buffers processed since last time we queue'd more
-				int processed;
-				OpenAL.getSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
-				to_process = max(processed, size-(buffer_end-buffer_start));
+				// If looping and our buffer has reached the end of the track
+				ulong blength = sound.getBuffersLength();
+				if (!looping && buffer_end+to_process >= blength)
+					to_process = blength - buffer_end;
 
-				// Update the buffers for this source if more than 1/4th have been used.
-				if (to_process > size/4)
-				{
-					// If looping and our buffer has reached the end of the track
-					ulong blength = sound.getBuffersLength();
-					if (!looping && buffer_end+to_process >= blength)
-						to_process = blength - buffer_end;
+				// Unqueue old buffers
+				unqueueBuffers();
 
-					// Unqueue old buffers
-					unqueueBuffers();
+				// Enqueue as many buffers as what are available
+				sound.allocBuffers(buffer_end, to_process);
+				OpenAL.sourceQueueBuffers(al_source, to!(int)(to_process), sound.getBuffers(buffer_end, buffer_end+to_process).ptr);
 
-					// Enqueue as many buffers as what are available
-					sound.allocBuffers(buffer_end, to_process);
-					OpenAL.sourceQueueBuffers(al_source, to!(int)(to_process), sound.getBuffers(buffer_end, buffer_end+to_process).ptr);
-
-					buffer_start+= processed;
-					buffer_end	+= to_process;
-				}
+				buffer_start+= processed;
+				buffer_end	+= to_process;
 			}
-
-			// If not playing
-			// Is this block still necessary if everything behaves as it should?
-			int state;
-			OpenAL.getSourcei(al_source, AL_SOURCE_STATE, &state);
-			if (state==AL_STOPPED || state==AL_INITIAL)
-			{	// but it should be, resume playback
-				if (enqueue)
-					OpenAL.sourcePlay(al_source);
-				else // we've reached the end of the track
-				{
-					// stop
-					OpenAL.sourceStop(al_source);
-					unqueueBuffers();
-					buffer_start = buffer_end = 0;
-
-					if (looping)
-					{	//play
-						OpenAL.sourcePlay(al_source);
-						enqueue = true;
-					}
-				}
-			}
-
-			// This is required for tracks with their total number of buffers equal to size.
-			if (enqueue)
-				// If not looping and our buffer has reached the end of the track
-				if (!looping && buffer_end+1 >= sound.getBuffersLength())
-					enqueue = false;
 		}
+
+		// If not playing
+		// Is this block still necessary if everything behaves as it should?
+		int state;
+		OpenAL.getSourcei(al_source, AL_SOURCE_STATE, &state);
+		if (state==AL_STOPPED || state==AL_INITIAL)
+		{	// but it should be, resume playback
+			if (enqueue)
+				OpenAL.sourcePlay(al_source);
+			else // we've reached the end of the track
+			{
+				// stop
+				OpenAL.sourceStop(al_source);
+				unqueueBuffers();
+				buffer_start = buffer_end = 0;
+
+				if (looping)
+				{	//play
+					OpenAL.sourcePlay(al_source);
+					enqueue = true;
+				}
+			}
+		}
+
+		// This is required for tracks with their total number of buffers equal to size.
+		if (enqueue)
+			// If not looping and our buffer has reached the end of the track
+			if (!looping && buffer_end+1 >= sound.getBuffersLength())
+				enqueue = false;
+
 	}
 
 	/*
@@ -423,13 +419,11 @@ private class SoundSource : IDisposable
 	private void unqueueBuffers()
 	{
 		if (sound)
-		{	synchronized
-			{
-                int processed;
-				OpenAL.getSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
-				OpenAL.sourceUnqueueBuffers(al_source, processed, sound.getBuffers(buffer_start, buffer_start+processed).ptr);
-				sound.freeBuffers(buffer_start, processed);
-    		}
+		{
+            int processed;
+			OpenAL.getSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
+			OpenAL.sourceUnqueueBuffers(al_source, processed, sound.getBuffers(buffer_start, buffer_start+processed).ptr);
+			sound.freeBuffers(buffer_start, processed);
         }
 	}
 

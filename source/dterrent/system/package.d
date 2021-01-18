@@ -8,4 +8,5 @@ module dterrent.system;
 
 public import dterrent.system.system,
               dterrent.system.logger,
-              dterrent.system.sound;
+              dterrent.system.sound,
+              dterrent.system.window;

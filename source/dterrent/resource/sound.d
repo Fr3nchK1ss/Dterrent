@@ -12,18 +12,13 @@ import std.format;
 import std.exception: enforce;
 import dterrent.system.sound;
 /+
-import tango.stdc.stringz;
-import derelict.openal.al;
 import derelict.vorbis.vorbis;
 import derelict.vorbis.enc;
 import derelict.vorbis.file;
 import yage.core.array;
 import yage.core.timer;
-import yage.core.object2;
 import yage.core.math.vector;
 import yage.resource.manager;
-import yage.system.log;
-import yage.system.sound.all;
 import yage.scene.sound;
 +/
 

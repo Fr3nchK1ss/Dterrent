@@ -17,5 +17,7 @@ void main()
 	// Init and create window
 	dterrent.system.init();
 
+    auto window = Window.getInstance();
+
 	dterrent.system.stop();
 }

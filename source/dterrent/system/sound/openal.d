@@ -25,7 +25,7 @@ class OpenALException : Exception
 /**
  * Class to bundle OpenAL
  */
-class OpenAL
+struct OpenAL
 {
     /**
      * wrapper around OpenAL functions in order to add error checking

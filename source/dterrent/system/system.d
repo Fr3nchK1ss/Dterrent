@@ -13,7 +13,6 @@ import libloader = dterrent.system.libloader;
 import dterrent.system.sound;
 
 /+
-import std.range;
 import tango.core.Memory;
 
 import derelict.opengl3.gl;
@@ -22,8 +21,6 @@ import derelict.util.exception;
 
 import yage.gui.surface;
 import yage.system.graphics.all;
-import yage.core.object2;
-import yage.core.math.vector;
 import yage.scene.scene;
 import yage.resource.manager;
 import yage.system.window;
@@ -78,8 +75,6 @@ void stop()
 	// TODO FIX THIS
 	//SDL_WM_GrabInput(SDL_GRAB_OFF);
 	SDL_ShowCursor(true);
-
-
 
 	foreach ( s; retro (Scene.getAllScenes().values) )
 		s.dispose();

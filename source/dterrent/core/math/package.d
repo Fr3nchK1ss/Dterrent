@@ -5,3 +5,5 @@
  */
 
 module dterrent.core.math;
+
+public import dterrent.core.math.math;
