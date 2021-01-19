@@ -16,8 +16,13 @@ void main()
 {
 	// Init and create window
 	dterrent.system.init();
-
     auto window = Window.getInstance();
 
+    window.onExit = delegate void() {
+		info("Window close, exiting...");
+		running = false;
+	};
+
+    // destroy window and stop system
 	dterrent.system.stop();
 }

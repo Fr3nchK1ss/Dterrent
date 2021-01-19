@@ -11,6 +11,7 @@ import dterrent.system.logger;
 import std.concurrency;
 import libloader = dterrent.system.libloader;
 import dterrent.system.sound;
+import dterrent.system.window;
 
 /+
 import tango.core.Memory;
@@ -23,7 +24,6 @@ import yage.gui.surface;
 import yage.system.graphics.all;
 import yage.scene.scene;
 import yage.resource.manager;
-import yage.system.window;
 +/
 
 
@@ -56,6 +56,7 @@ void init()
 
 	stopWatch.stop();
 	infof("Dterrent initialized in %s msecs", stopWatch.peek.total!"msecs");
+
 }
 
 
@@ -90,6 +91,7 @@ void stop()
 	//GC.collect(); // Crashes when called in debug mode
 
     +/
+    Window.getInstance().destroy();
 
     libloader.unloadAll();
 

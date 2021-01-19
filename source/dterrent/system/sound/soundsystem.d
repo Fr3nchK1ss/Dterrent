@@ -56,7 +56,7 @@ class SoundContext
 	{
 		// Get a device
 		device = OpenAL.openDevice(null); // device is a package variable defined in openal.d
-		infof("Using OpenAL Device '%s'.", fromStringz(OpenAL.getString(device, ALC_DEVICE_SPECIFIER)));
+		tracef("Using OpenAL Device '%s'.", fromStringz(OpenAL.getString(device, ALC_DEVICE_SPECIFIER)));
 
 		// Get a context
 		context = OpenAL.createContext(device, null);

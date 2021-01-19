@@ -25,7 +25,7 @@ import bindbc.opengl;
  */
 mixin template mxtpl_logResult(E, E validVersion, string libName)
 {
-	void logResult(E libVersion, LogLevel level)
+	void logResult(immutable E libVersion, immutable LogLevel level)
     {
         if(libVersion != validVersion)
         {
@@ -86,8 +86,11 @@ void loadAll() {
 
 void loadOpenGL()
 {
-    mixin mxtpl_logResult!(GLSupport, GLSupport.gl43, "OpenGL");
+    mixin mxtpl_logResult!(GLSupport, GLSupport.gl46, "OpenGL");
     logResult( bindbc.opengl.loadOpenGL(), LogLevel.fatal );
+
+    import std.stdio: writeln;
+    writeln("");
 }
 
 
@@ -98,11 +101,9 @@ bool isOpenALLoaded()
 
 
 void unloadAll(){
-    /*
-    SDL_Quit();
-
+    unloadOpenGL();
     unloadSDL();
     unloadOpenAL();
     unloadFreeType();
-    */
+
 }

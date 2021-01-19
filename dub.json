@@ -17,7 +17,7 @@
 	},
 	"versions": [
 		"SDL_Image",
-        "GL_43"
+        "GL_46"
 	],
 
 }

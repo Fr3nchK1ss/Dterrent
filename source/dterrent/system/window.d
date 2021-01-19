@@ -18,8 +18,6 @@ import dterrent.core.math;
 import libloader = dterrent.system.libloader;
 
 /*
-import tango.io.Stdout;
-
 import derelict.util.exception;
 import derelict.sdl2.types;
 import yage.gui.surface;
@@ -79,17 +77,63 @@ class Window : IRenderTarget
 			throw new Exception ("Unable to initialize SDL: " ~ to!string(SDL_GetError()) );
 
         setResolution(width, height);
+
+        // Set GL attributes
+        // choose: SDL_GL_CONTEXT_PROFILE_CORE  SDL_GL_CONTEXT_PROFILE_COMPATIBILITY
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+        // Create SDL window
+        uint flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
+        version (linux)
+        {
+            if (fullscreen)
+                flags |= SDL_WINDOW_FULLSCREEN;
+        }
+
+        sdlWindow = SDL_CreateWindow("DT3RR3NT",
+                                  cast(int) SDL_WINDOWPOS_UNDEFINED,
+                                  cast(int) SDL_WINDOWPOS_UNDEFINED,
+                                  cast(int) winWidth,
+                                  cast(int) winHeight,
+                                  cast(SDL_WindowFlags) flags); // TODO depth, is no longer an option.
+
+        sdlSurface = SDL_GetWindowSurface(sdlWindow);
+        mainGLContext = SDL_GL_CreateContext(sdlWindow);
+
+        // OpenGL must be loaded after context creation
+        libloader.loadOpenGL();
+
+        if(sdlSurface is null)
+            throw new Exception(format("Unable to set %d x %d video mode: %s ", winWidth, winHeight, SDL_GetError()));
+        SDL_LockSurface(sdlSurface);
+
+        setViewport();
+
+
+        int major, minor;
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+        infof ("SDL is using OpenGL %d.%d\n", major, minor);
+
+        info ("OpenGL renderer: " ~ to!string(glGetString(GL_RENDERER)));
+        info ("OpenGL version: " ~ to!string(glGetString(GL_VERSION)));
+        //info ("OpenGL version: " ~ to!string(glGetString(GL_SHADING_LANGUAGE_VERSION​)));
 	}
 
-/+
-	void dispose()
-	{	if (instance)
+
+	~this()
+	{
+        trace("destroy window \n");
+        if (instance)
 		{	SDL_FreeSurface(sdlSurface); // TODO I probably need a surface anyway for other things...
-			DerelictGL.unload();
+			SDL_Quit();
 			instance = null;
 		}
 	}
-+/
+
 	/// Get the width / height of this Window's display area (not including title/borders) in pixels.
 	override ulong getWidth()
 	{	return winWidth;
@@ -146,8 +190,8 @@ class Window : IRenderTarget
 		{
 			fullscreen = fullscreen_;
 		}
-
 		// Anti-aliasing
+
 		if (samples > 1)
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 		else
@@ -157,103 +201,36 @@ class Window : IRenderTarget
 		winWidth = w;
 		winHeight = h;
 
-		// If SDL ever decouples window creation from initialization, we can move these to System.init().
-		// Create the screen surface (window)
-		uint flags = SDL_WINDOW_RESIZABLE | SDL_GL_DOUBLEBUFFER | SDL_WINDOW_OPENGL; // TODO these no longer matter? | SDL_HWPALETTE | SDL_HWACCEL;
-		if (fullscreen_) flags |= SDL_WINDOW_FULLSCREEN;
-			sdlWindow = SDL_CreateWindow("DT3RR3NT",
-                                      cast(int) SDL_WINDOWPOS_UNDEFINED,
-                                      cast(int) SDL_WINDOWPOS_UNDEFINED,
-                                      cast(int) winWidth,
-                                      cast(int) winHeight,
-                                      cast(SDL_WindowFlags) flags); // TODO depth, is no longer an option.
-
-		sdlSurface = SDL_GetWindowSurface(sdlWindow);
-        mainGLContext = SDL_GL_CreateContext(sdlWindow);
-
-		libloader.loadOpenGL();
-
-		if(sdlSurface is null)
-			throw new Exception(format("Unable to set %d x %d video mode: %s ", winWidth, winHeight, SDL_GetError()));
-		SDL_LockSurface(sdlSurface);
-
-		// TODO these likely need to be completely redone for SDL2 anyway
-		// These have to be set after window creation.
-		// SDL_EnableUNICODE(1);
-		//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-		// SDL_EnableKeyRepeat(0, 0); // disable, we handle it ourselves
-
-		// TODO these are assumed once we move to full GL3
-		// Attempt to load multitexturing
-/*		if (Probe.feature(Probe.Feature.MULTITEXTURE))
-		{	if (!ARBMultitexture.load("GL_ARB_multitexture"))
-				throw new YageException("GL_ARB_multitexture extension detected but it could not be loaded.");
-			Log.info("GL_ARB_multitexture support enabled.");
-		}else
-			Log.info("GL_ARB_multitexture not supported.  This is ok, but graphical quality may be limited.");
-
-		// Texture Compression
-		if (Probe.feature(Probe.Feature.TEXTURE_COMPRESSION))
-		{	if (!ARBTextureCompression.load("GL_ARB_texture_compression"))
-				throw new YageException("GL_ARB_texture_compression extension detected but it could not be loaded.");
-			Log.info("GL_ARB_texture_compression support enabled.");
-		}else
-			Log.info("GL_ARB_multitexture not supported.  This is ok, but graphical quality may be limited.");
-
-		// Attempt to load shaders
-		if (Probe.feature(Probe.Feature.SHADER))
-		{	if (!ARBShaderObjects.load("GL_ARB_shader_objects"))
-				throw new YageException("GL_ARB_shader_objects extension detected but it could not be loaded.");
-			if (!ARBVertexShader.load("GL_ARB_vertex_shader"))
-				throw new YageException("GL_ARB_vertex_shader extension detected but it could not be loaded.");
-			Log.info("GL_ARB_shader_objects support enabled.");
-		}else
-			Log.info("GL_ARB_shader_objects not supported.  This is ok, but rendering will be limited to the fixed-function pipeline.");
-
-		// Attempt to load vertex buffer object
-		if (Probe.feature(Probe.Feature.VBO))
-		{	if (!ARBVertexBufferObject.load("GL_ARB_vertex_buffer_object"))
-				throw new YageException("GL_ARB_vertex_buffer_object extension detected but it could not be loaded.");
-			Log.info("GL_ARB_vertex_buffer_object support enabled.");
-		}else
-			Log.info("GL_ARB_vertex_buffer_object not supported.  This is still ok.");
-
-		// Frame Buffer Object
-		if (Probe.feature(Probe.Feature.FBO))
-		{	if (!EXTFramebufferObject.load("GL_EXT_framebuffer_object"))
-				throw new YageException("GL_EXT_framebuffer_object extension detected but it could not be loaded.");
-			Log.info("GL_EXT_framebuffer_object support enabled.");
-		}else
-			Log.info("GL_EXT_framebuffer_object not supported.  This is still ok.");
-*/
-
-/+
-		// OpenGL options
-		// These are the engine defaults.  Any function that modifies these should reset them when done.
-		// TODO: Move these to OpenGL.reset()
-		glShadeModel(GL_SMOOTH);
-+/
-		glClearDepth(1);
-/+
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_NORMALIZE);  // GL_RESCALE_NORMAL is faster but does not work for non-uniform scaling
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-		glHint(GL_FOG_HINT, GL_FASTEST); // per vertex fog
-		glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, true); // [below] Specular highlights w/ textures.
-		glLightModeli(LIGHT_MODEL_COLOR_CONTROL_EXT, SEPARATE_SPECULAR_COLOR_EXT);
-
-		glEnable(GL_LIGHTING);
-		glFogi(GL_FOG_MODE, GL_EXP); // Most realistic?
-
-		// Environment Mapping (disabled by default)
-		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-+/
-		setViewport();
 	}
+
+    void setOpenGL()
+    {
+        /+
+        		// OpenGL options
+        		// These are the engine defaults.  Any function that modifies these should reset them when done.
+        		// TODO: Move these to OpenGL.reset()
+        		glShadeModel(GL_SMOOTH);
+        +/
+        		glClearDepth(1);
+        /+
+        		glEnable(GL_DEPTH_TEST);
+        		glDepthFunc(GL_LEQUAL);
+
+        		glEnable(GL_CULL_FACE);
+        		glEnable(GL_NORMALIZE);  // GL_RESCALE_NORMAL is faster but does not work for non-uniform scaling
+        		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+        		glHint(GL_FOG_HINT, GL_FASTEST); // per vertex fog
+        		glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, true); // [below] Specular highlights w/ textures.
+        		glLightModeli(LIGHT_MODEL_COLOR_CONTROL_EXT, SEPARATE_SPECULAR_COLOR_EXT);
+
+        		glEnable(GL_LIGHTING);
+        		glFogi(GL_FOG_MODE, GL_EXP); // Most realistic?
+
+        		// Environment Mapping (disabled by default)
+        		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+        		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+        +/
+    }
 
 	/**
 	 * Set the viewport position and size
@@ -278,21 +255,10 @@ class Window : IRenderTarget
 	{	winWidth = w;
 		winHeight = h;
 
-                // TODO this is likely never needed anymore?
-		// For some reason, SDL Linux requires a call to SDL_SetVideoMode for a screen resize that's
-		// larger than the current screen. (need to try this with latest version of SDL, also try SDL lock surface)
-		// This same code would crash the engine on windows.
-		// This code may now be un-needed and needs to be retested.
-		// See http://www.libsdl.org/cgi/docwiki.cgi/SDL_5fResizeEvent
-/*		version (linux)
-		{	uint flags = SDL_HWSURFACE | SDL_GL_DOUBLEBUFFER | SDL_OPENGL | SDL_RESIZABLE | SDL_HWPALETTE | SDL_HWACCEL;
-			if (fullscreen)
-				flags |= SDL_FULLSCREEN;
-			sdlSurface = SDL_SetVideoMode(winWidth, winHeight, 0, flags);
-			if (sdlSurface is null)
-				throw new YageException("Failed to resize the window!");
-		} */
+        //SDL_SetWindowSize(sdlWindow, w, h);
+        setViewport();
 	}
+
 /+
 	/**
 	 * Get an image from the Window's back-buffer (where image operations take place).
