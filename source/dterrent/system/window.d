@@ -120,7 +120,7 @@ class Window : IRenderTarget
 
         info ("OpenGL renderer: " ~ to!string(glGetString(GL_RENDERER)));
         info ("OpenGL version: " ~ to!string(glGetString(GL_VERSION)));
-        //info ("OpenGL version: " ~ to!string(glGetString(GL_SHADING_LANGUAGE_VERSION​)));
+        info ("GLSL version: " ~ to!string(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 	}
 
 
@@ -134,7 +134,21 @@ class Window : IRenderTarget
 		}
 	}
 
-	/// Get the width / height of this Window's display area (not including title/borders) in pixels.
+
+	/**
+	 * Returns: The singleton Window instance.
+     */
+	static Window getInstance(int width = 1366, int height = 768)
+	{
+        if (instance)
+			return instance;
+		return instance = new Window(width, height);
+	}
+
+
+	/**
+     Get the width / height of this Window's display area (not including title/borders) in pixels.
+     */
 	override ulong getWidth()
 	{	return winWidth;
 	}
@@ -190,8 +204,8 @@ class Window : IRenderTarget
 		{
 			fullscreen = fullscreen_;
 		}
-		// Anti-aliasing
 
+		// Anti-aliasing
 		if (samples > 1)
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 		else
@@ -203,33 +217,26 @@ class Window : IRenderTarget
 
 	}
 
+    /**
+     * Set OpenGL options
+     */
     void setOpenGL()
     {
-        /+
-        		// OpenGL options
-        		// These are the engine defaults.  Any function that modifies these should reset them when done.
-        		// TODO: Move these to OpenGL.reset()
-        		glShadeModel(GL_SMOOTH);
-        +/
-        		glClearDepth(1);
-        /+
-        		glEnable(GL_DEPTH_TEST);
-        		glDepthFunc(GL_LEQUAL);
-
-        		glEnable(GL_CULL_FACE);
-        		glEnable(GL_NORMALIZE);  // GL_RESCALE_NORMAL is faster but does not work for non-uniform scaling
-        		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-        		glHint(GL_FOG_HINT, GL_FASTEST); // per vertex fog
-        		glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, true); // [below] Specular highlights w/ textures.
-        		glLightModeli(LIGHT_MODEL_COLOR_CONTROL_EXT, SEPARATE_SPECULAR_COLOR_EXT);
-
-        		glEnable(GL_LIGHTING);
-        		glFogi(GL_FOG_MODE, GL_EXP); // Most realistic?
-
-        		// Environment Mapping (disabled by default)
-        		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-        		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
-        +/
+		///glShadeModel(GL_SMOOTH); DEPRECATED
+		glClearDepth(1);
+		glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+		glEnable(GL_CULL_FACE);
+	    ///glEnable(GL_NORMALIZE); DEPRECATED
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        
+        /// Below : deprecated
+		///glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, true);
+		///glLightModeli(LIGHT_MODEL_COLOR_CONTROL_EXT, SEPARATE_SPECULAR_COLOR_EXT);
+		///glEnable(GL_LIGHTING);
+		///glFogi(GL_FOG_MODE, GL_EXP);
+		///glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+        ///glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
     }
 
 	/**
@@ -259,46 +266,4 @@ class Window : IRenderTarget
         setViewport();
 	}
 
-/+
-	/**
-	 * Get an image from the Window's back-buffer (where image operations take place).
-	 * Params:
-	 *     buffer = Can be COLOR, DEPTH, or STENCIL to get the corresponding buffer.
-	 * Returns: Image1ub for the stencil buffer, Image1ui for the depth buffer, or Image3ub for the color buffer.
-	 * Example:
-	 * --------
-	 * IImage image = Window.getInstance().toImage(Window.Buffer.DEPTH);
-	 ................* ubyte[] data = image.convert!(ubyte, 1).getBytes();  // convert imagem,\ from 32-bit grayscale to 8-bit grayscale
-	 * File file = new File("depth.raw", File.WriteCreate); // Photoshop can open raw files
-	 * file.write(image.convert!(ubyte, 1).getBytes());
-	 * file.close();
-	 * --------
-	 */
-	ImageBase toImage(Buffer buffer=Buffer.COLOR)
-	{
-		if (buffer==Buffer.STENCIL)		{
-			Image1ub result = new Image1ub(to!ubyte(winWidth), to!ubyte(winHeight));
-			glReadPixels(0, 0, to!int(winWidth), to!int(winHeight), GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, result.data.ptr);
-			return result;
-		}
-		else if (buffer==Buffer.DEPTH)
-		{	Image2!(int, 1) result = new Image2!(int, 1)(to!int(winWidth), to!int(winHeight));
-			glReadPixels(0, 0, to!int(winWidth), to!int(winHeight), GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, result.data.ptr);
-			return result;
-		} else // color
-		{	Image3ub result = new Image3ub(to!ubyte(winWidth), to!ubyte(winHeight));
-			glReadPixels(0, 0, to!int(winWidth), to!int(winHeight), GL_RGB,GL_UNSIGNED_BYTE, result.data.ptr);
-			return result;
-		}
-	}
-
-+/
-	/**
-	 * Returns: The singleton Window instance. */
-	static Window getInstance(int width = 1366, int height = 768)
-	{
-        if (instance)
-			return instance;
-		return instance = new Window(width, height);
-	}
 }

@@ -83,15 +83,10 @@ void stop()
 	Render.cleanup(0); // textures, vbo's, and other OpenGL resources
 
 	ResourceManager.dispose();
-
-	if (Window.getInstance())
-		Window.getInstance().dispose();
-
-	// TODO: This shouldn't be needed to force any calls to dispose.
-	//GC.collect(); // Crashes when called in debug mode
-
     +/
-    Window.getInstance().destroy();
+    
+    if (Window.getInstance())
+        Window.getInstance().destroy();
 
     libloader.unloadAll();
 

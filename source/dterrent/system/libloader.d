@@ -101,6 +101,7 @@ bool isOpenALLoaded()
 
 
 void unloadAll(){
+    
     unloadOpenGL();
     unloadSDL();
     unloadOpenAL();
