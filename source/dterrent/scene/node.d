@@ -81,7 +81,7 @@ class Node : Tree!(Node), IDisposable
             }, this);
 +/
 	}
-/+
+
 	/**
 	 * Add a child Node to this Node's array of children.
 	 * Overridden to call ancestorChange() and mark transformation matrices dirty.
@@ -93,7 +93,6 @@ class Node : Tree!(Node), IDisposable
 	{	assert(child !is this);
 		assert(child !is parent);
 		assert(child.transformIndex==-1 || child.transform().node is child);
-
 
 		auto oldParent = child.getParent();
 		super.addChild(child);
@@ -152,7 +151,7 @@ class Node : Tree!(Node), IDisposable
 		assert(b.getChildren().length == 1);
 		assert(b.getChildren()[0] != a.getChildren()[0]); // should not be equal, should've been cloned.
 	}
-+/
+
 	/**
 	 * Some types of Nodes may need to free resources before being destructed.
      */

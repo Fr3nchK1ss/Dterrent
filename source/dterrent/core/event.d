@@ -18,7 +18,11 @@ module dterrent.core.event;
 struct Event(T...)
 {
 	void delegate() listenersChanged; /// Called after the listeners are added or removed.
-	protected bool[void delegate(T)] listeners; // A set.  Associative arrays are copied by ref, so when one event is assigned to another, they will both point ot the same listeners.
+    /*
+     * A set. Associative arrays are copied by ref, so when one event is assigned to another,
+     * they will both point ot the same listeners.
+     */
+	protected bool[void delegate(T)] listeners;
 
 	void addListener(void delegate(T) listener)
 	{	listeners[listener] = true;

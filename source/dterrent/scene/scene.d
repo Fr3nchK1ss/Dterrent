@@ -104,7 +104,7 @@ class Scene : Node
 
 		all_scenes[this] = this;
 	}
-/+
+
 	/**
 	 * Call dispose() on destruction. */
 	~this()
@@ -117,8 +117,8 @@ class Scene : Node
 	 * Params:
 	 *     children = recursively clone children (and descendants) and add them as children to the new Node.
 	 * Returns: The cloned Node. */
-	 alias Node.clone clone; // TODO learn why GDC says I need this
-	/*override*/ Scene clone(bool children=false, Scene destination=null)
+    alias Node.clone clone; // for the call to super.clone
+	Scene clone(bool children=false, Scene destination=null)
 	{
 		auto result = cast(Scene)super.clone(children, destination);
 		result.ambient = ambient;
@@ -136,9 +136,9 @@ class Scene : Node
 	override void dispose()
 	{	if (this in all_scenes) // repeater will be null if dispose has already been called.
 		{	super.dispose();
-			cameras = null;
-			lights = null;
-			sounds = null;
+			//cameras = null;
+			//lights = null;
+			//sounds = null;
 			all_scenes.remove(this);
 		}
 	}
@@ -158,7 +158,7 @@ class Scene : Node
 	void unlock() /// ditto
 	{	mutex.unlock();
 	}
-
+/+
 	/**
 	 * Update all Nodes in the scene by delta seconds.
 	 * This function is typically called automatically at a set interval from the scene's updateThread once scene.play() is called.
@@ -286,7 +286,7 @@ class Scene : Node
 	SoundNode[SoundNode] getAllSounds()
 	{	return sounds;
 	}
-
++/
 	/*
 	 * Used internally. */
 	Object getSoundsMutex()
@@ -298,5 +298,5 @@ class Scene : Node
 	static Scene[Scene] getAllScenes()
 	{	return all_scenes;
 	}
-    +/
+
 }

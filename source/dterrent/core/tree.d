@@ -41,13 +41,13 @@ class Tree(T) : EngineObject
 
 		if (child.parent is this)
 			return child;
-/+
+
 		// If child has an existing parent.
 		if (child.parent)
 		{	assert(child.parent.isChild(cast(S)child));
-			dterrent.core.array.move(child.parent.children, child.index);
+			dterrent.core.array.remove(child.parent.children, child.index);
 		}
-+/
+
 		// Add as a child.
 		child.parent = cast(T)this;
 		children ~= cast(T)child;
@@ -55,7 +55,7 @@ class Tree(T) : EngineObject
 
 		return child;
 	}
-/+
+
 	/**
 	 * Remove a child element
 	 * Params:
@@ -69,8 +69,8 @@ class Tree(T) : EngineObject
 		assert(child.parent == this);
 
 		if (child.index >= 0)
-		{	//yage.core.all.remove(parent.children, index, false);
-			yage.core.all.remove(children, child.index, false);
+		{
+            dterrent.core.array.remove(children, child.index, false);
 			if (child.index < children.length) // update index of element that replaced child.
 				children[child.index].index = child.index;
 			child.index = -1; // so remove can't be called twice.
@@ -102,5 +102,5 @@ class Tree(T) : EngineObject
 			return false;
 		return cast(bool)(children[elem.index] == elem);
 	}
-+/
+
 }
