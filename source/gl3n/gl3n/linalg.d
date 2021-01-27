@@ -63,29 +63,29 @@ struct Vector(type, int dimension_) {
 
     @safe pure nothrow:
     ///
-    private @property ref inout(vt) get_(char coord)() inout {
+    @property ref inout(vt) get_(char coord)() inout {
         return vector[coord_to_index!coord];
     }
 
-    alias get_!'x' x; /// static properties to access the values.
-    alias x u; /// ditto
-    alias x s; /// ditto
-    alias x r; /// ditto
+    alias x = get_!'x'; /// static properties to access the values.
+    alias u = x; /// ditto
+    alias s = x; /// ditto
+    alias r = x; /// ditto
     static if(dimension >= 2) {
-        alias get_!'y' y; /// ditto
-        alias y v; /// ditto
-        alias y t; /// ditto
-        alias y g; /// ditto
+        alias y = get_!'y'; /// ditto
+        alias v = y; /// ditto
+        alias t = y; /// ditto
+        alias g = y; /// ditto
     }
     static if(dimension >= 3) {
-        alias get_!'z' z; /// ditto
-        alias z b; /// ditto
-        alias z p; /// ditto
+        alias z = get_!'z'; /// ditto
+        alias b = z; /// ditto
+        alias p = z; /// ditto
     }
     static if(dimension >= 4) {
-        alias get_!'w' w; /// ditto
-        alias w a; /// ditto
-        alias w q; /// ditto
+        alias w = get_!'w'; /// ditto
+        alias a = w; /// ditto
+        alias q = w; /// ditto
     }
 
     static if(dimension == 2) {
