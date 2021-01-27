@@ -13,6 +13,7 @@
 		"bindbc-openal": ">=0.4.1",
 		"bindbc-freetype": ">=0.9.1",
         "bindbc-opengl": "~>0.13.0",
+        "gl3n": { "path": "./source/gl3n/" }
 	},
 	"versions": [
 		"SDL_Image",

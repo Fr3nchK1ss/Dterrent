@@ -385,7 +385,7 @@ class Node : Tree!(Node), IDisposable
 		assert (!scene || (transformIndex>=0 && transformIndex<scene.nodeTransforms.length),
             format("transformIndex: %d", transformIndex));
 
-        trace("index = ", transformIndex);
+        //trace("index = ", transformIndex);
 		return scene ?
 			&scene.nodeTransforms.transforms[transformIndex] :
                 &orphanTransforms.transforms[transformIndex];
