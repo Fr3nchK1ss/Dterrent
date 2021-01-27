@@ -16,6 +16,7 @@ import bindbc.opengl;
 import dterrent.core.interfaces;
 import dterrent.core.math;
 import libloader = dterrent.system.libloader;
+public import gl3n.linalg;
 
 /*
 import derelict.util.exception;
@@ -229,7 +230,7 @@ class Window : IRenderTarget
 		glEnable(GL_CULL_FACE);
 	    ///glEnable(GL_NORMALIZE); DEPRECATED
 		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-        
+
         /// Below : deprecated
 		///glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, true);
 		///glLightModeli(LIGHT_MODEL_COLOR_CONTROL_EXT, SEPARATE_SPECULAR_COLOR_EXT);
