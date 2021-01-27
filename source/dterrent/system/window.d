@@ -16,7 +16,6 @@ import bindbc.opengl;
 import dterrent.core.interfaces;
 import dterrent.core.math;
 import libloader = dterrent.system.libloader;
-public import gl3n.linalg;
 
 /*
 import derelict.util.exception;

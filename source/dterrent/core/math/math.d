@@ -8,4 +8,4 @@ module dterrent.core.math.math;
 
 public import gl3n.linalg;
 
-alias Vector!(int, 2) vec2i;
+alias vec2i = Vector!(int, 2);

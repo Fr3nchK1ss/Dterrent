@@ -42,9 +42,7 @@ version(NoReciprocalMul) {
 /// dimension = specifies the dimension of the vector, can be 1, 2, 3 or 4
 /// Examples:
 /// ---
-/// alias Vector!(int, 3) vec3i;
-/// alias Vector!(float, 4) vec4;
-/// alias Vector!(real, 2) vec2r;
+/// alias vec3i = Vector!(int, 3);
 /// ---
 struct Vector(type, int dimension_) {
     static assert(dimension > 0, "0 dimensional vectors don't exist.");
@@ -1401,11 +1399,11 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
         /// ditto
         static Matrix translation(Vector!(mt, 3) v) {
             Matrix ret = Matrix.identity;
-            
+
             ret.matrix[0][cols-1] = v.x;
             ret.matrix[1][cols-1] = v.y;
             ret.matrix[2][cols-1] = v.z;
-            
+
             return ret;
         }
 
@@ -2380,9 +2378,9 @@ struct Quaternion(type) {
         enum startPitch = 0.1;
         enum startYaw = -0.2;
         enum startRoll = 0.6;
-        
+
         auto q = quat.euler_rotation(startRoll,startPitch,startYaw);
-        
+
         assert(almost_equal(q.pitch,startPitch));
         assert(almost_equal(q.yaw,startYaw));
         assert(almost_equal(q.roll,startRoll));
