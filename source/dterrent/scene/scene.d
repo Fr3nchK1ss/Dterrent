@@ -61,8 +61,6 @@ class Scene : Node
 								/// where objects become completely obscured by the fog. */
 	float speedOfSound = 343f;	/// Speed of sound in units/second
 
-
-	//ArrayBuilder!(Node.Transform) nodeTransforms;
 	package ContiguousTransforms nodeTransforms;
 
 /+
@@ -70,10 +68,10 @@ class Scene : Node
 	protected LightNode[LightNode] lights;
 	protected SoundNode[SoundNode] sounds;
 +/
-	protected FastLock mutex;
+	protected Mutex mutex;
 	protected Mutex camerasMutex;
 	protected Mutex lightsMutex; // Having a separate mutex prevents render from waiting for the start of the next update loop.
-	protected Object soundsMutex;
+	protected Mutex soundsMutex;
 
 	float updateTime;
 
@@ -86,8 +84,7 @@ class Scene : Node
 	 * Construct an empty Scene.
 	 * The update frequency cannot be changed after the scene is started. */
 	this()
-	{	mutex = new FastLock();
-
+	{
 		super();
 		scene = this;
 		transformIndex = nodeTransforms.addNew(this);
@@ -98,9 +95,10 @@ class Scene : Node
 		backgroundColor = Color("black");	// OpenGL default clear color
 		fogColor = Color("gray");
 
+        mutex = new Mutex();
 		camerasMutex = new Mutex();
 		lightsMutex = new Mutex();
-		soundsMutex = new Object();
+		soundsMutex = new Mutex();
 
 		all_scenes[this] = this;
 	}

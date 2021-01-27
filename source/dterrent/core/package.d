@@ -12,5 +12,4 @@ public import dterrent.core.interfaces,
               dterrent.core.engineobject,
               dterrent.core.array,
               dterrent.core.color,
-              dterrent.core.multithreading,
               dterrent.core.event;
