@@ -116,7 +116,7 @@ class Window : IRenderTarget
         int major, minor;
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
-        infof ("SDL is using OpenGL %d.%d\n", major, minor);
+        //tracef ("SDL is using OpenGL %d.%d\n", major, minor);
 
         info ("OpenGL renderer: " ~ to!string(glGetString(GL_RENDERER)));
         info ("OpenGL version: " ~ to!string(glGetString(GL_VERSION)));

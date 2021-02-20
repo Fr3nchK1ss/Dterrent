@@ -13,8 +13,8 @@ private {
 /// Params:
 /// type = all values get stored as this type
 struct AABBT(type, uint dimension_ = 3) {
-    alias at = type; /// Holds the internal type of the AABB.
-    alias vec = Vector!(at, dimension_); /// Convenience alias to the corresponding vector type.
+    alias type at; /// Holds the internal type of the AABB.
+    alias Vector!(at, dimension_) vec; /// Convenience alias to the corresponding vector type.
     alias dimension = dimension_;
     static assert(dimension > 0, "0 dimensional AABB don't exist.");
 
@@ -288,21 +288,21 @@ struct AABBT(type, uint dimension_ = 3) {
     }
 }
 
-alias AABB3 = AABBT!(float, 3);
-alias AABB2 = AABBT!(float, 2);
+alias AABBT!(float, 3) AABB3;
+alias AABBT!(float, 2) AABB2;
 
-alias AABB = AABB3;
+alias AABB3 AABB;
 
 
 unittest {
     import gl3n.util : TypeTuple;
-    alias Types = TypeTuple!(ubyte, byte, short, ushort, int, uint, float, double);
+    alias TypeTuple!(ubyte, byte, short, ushort, int, uint, float, double) Types;
     foreach(type; Types)
     {
         foreach(dim; TupleRange!(1, 5))
         {
             {
-                alias aabbTestType = AABBT!(type,dim);
+                alias AABBT!(type,dim) aabbTestType;
                 auto instance = AABBT!(type,dim)();
             }
         }
