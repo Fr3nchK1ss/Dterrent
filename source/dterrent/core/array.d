@@ -1,5 +1,18 @@
 /**
- * Authors:    Eric Poggel, Fr3nchk1ss
+ * Copyright:  (c) 2005-2009 Eric Poggel
+ * Authors:    Eric Poggel
+ * License:    <a href="lgpl3.txt">LGPL v3</a>
+ *
+ * Array operation functions that are either not part of,
+ * or improved from the standard library.
+ *
+ * Note that they can also be accessed by arrayname.function().
+ *
+ * Example:
+ * --------------------------------
+ * // Removing
+ * int[] numbers = [0, 1, 2];
+ * numbers.remove(0); // numbers is now [0, 1];
  */
 
 module dterrent.core.array;
@@ -21,8 +34,7 @@ import std.format;
  *     increasing = The elements are stored in increasing order.
  *     getKey = A function to return a key of type K for each element.
  *     			K must be either a primitive type or a type that impelments opCmp.
- *              Only required for arrays of classes and structs.
- */
+ *              Only required for arrays of classes and structs. */
 void addSorted(T,K)(ref T[] array, T value, bool increasing, K delegate(T elem) getKey, int max_length=int.max)
 {
 	if (!array.length)

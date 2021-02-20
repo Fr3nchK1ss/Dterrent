@@ -42,9 +42,7 @@ version(NoReciprocalMul) {
 /// dimension = specifies the dimension of the vector, can be 1, 2, 3 or 4
 /// Examples:
 /// ---
-/// alias Vector!(int, 3) vec3i;
-/// alias Vector!(float, 4) vec4;
-/// alias Vector!(real, 2) vec2r;
+/// alias vec3i = Vector!(int, 3);
 /// ---
 struct Vector(type, int dimension_) {
     static assert(dimension > 0, "0 dimensional vectors don't exist.");
@@ -65,29 +63,29 @@ struct Vector(type, int dimension_) {
 
     @safe pure nothrow:
     ///
-    private @property ref inout(vt) get_(char coord)() inout {
+    @property ref inout(vt) get_(char coord)() inout {
         return vector[coord_to_index!coord];
     }
 
-    alias get_!'x' x; /// static properties to access the values.
-    alias x u; /// ditto
-    alias x s; /// ditto
-    alias x r; /// ditto
+    alias x = get_!'x'; /// static properties to access the values.
+    alias u = x; /// ditto
+    alias s = x; /// ditto
+    alias r = x; /// ditto
     static if(dimension >= 2) {
-        alias get_!'y' y; /// ditto
-        alias y v; /// ditto
-        alias y t; /// ditto
-        alias y g; /// ditto
+        alias y = get_!'y'; /// ditto
+        alias v = y; /// ditto
+        alias t = y; /// ditto
+        alias g = y; /// ditto
     }
     static if(dimension >= 3) {
-        alias get_!'z' z; /// ditto
-        alias z b; /// ditto
-        alias z p; /// ditto
+        alias z = get_!'z'; /// ditto
+        alias b = z; /// ditto
+        alias p = z; /// ditto
     }
     static if(dimension >= 4) {
-        alias get_!'w' w; /// ditto
-        alias w a; /// ditto
-        alias w q; /// ditto
+        alias w = get_!'w'; /// ditto
+        alias a = w; /// ditto
+        alias q = w; /// ditto
     }
 
     static if(dimension == 2) {
@@ -1401,11 +1399,11 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
         /// ditto
         static Matrix translation(Vector!(mt, 3) v) {
             Matrix ret = Matrix.identity;
-            
+
             ret.matrix[0][cols-1] = v.x;
             ret.matrix[1][cols-1] = v.y;
             ret.matrix[2][cols-1] = v.z;
-            
+
             return ret;
         }
 
@@ -1991,10 +1989,10 @@ struct Quaternion(type) {
     alias as_string toString;
 
     @safe pure nothrow:
-    private @property qt get_(char coord)() const {
+    @property qt get_(char coord)() const {
         return quaternion[coord_to_index!coord];
     }
-    private @property void set_(char coord)(qt value) {
+    @property void set_(char coord)(qt value) {
         quaternion[coord_to_index!coord] = value;
     }
 
@@ -2380,9 +2378,9 @@ struct Quaternion(type) {
         enum startPitch = 0.1;
         enum startYaw = -0.2;
         enum startRoll = 0.6;
-        
+
         auto q = quat.euler_rotation(startRoll,startPitch,startYaw);
-        
+
         assert(almost_equal(q.pitch,startPitch));
         assert(almost_equal(q.yaw,startYaw));
         assert(almost_equal(q.roll,startRoll));
