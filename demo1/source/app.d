@@ -41,7 +41,7 @@ void main()
 
         if (updateCountDown == 0)
         {
-            Window.getInstance().setCaption("Dt3rr3nt"
+            Window.getInstance().setCaption("Dterrent"
                 ~ "   -   current FPS = "
                 ~ to!string(FPS)
                 ~ "   -   max FPS = "

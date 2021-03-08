@@ -59,8 +59,9 @@ class Node : Tree!(Node), IDisposable
 	package Scene scene;			// The Scene that this node belongs to.
 	Event!() onUpdate;	/// If set, call this function instead of the standard update function.
 
+    // Contract programming
 	invariant()
-	{	assert(parent !is this);/*TODO*/
+	{	assert(parent !is this);
 	}
 
 
@@ -119,7 +120,7 @@ class Node : Tree!(Node), IDisposable
 	 * Params:
 	 *     child = The Node to remove.
 	 * Returns: The child Node that was removed.  Templating is used to ensure the return type is exactly the same.*/
-	T removeChild(T : Node)(T child)
+	T removeChild(T : Node)(T child) //
 	{
 		auto oldParent = child.getParent();
 		super.removeChild(child);
@@ -159,7 +160,8 @@ class Node : Tree!(Node), IDisposable
 		return destination;
 	}
 	unittest
-	{	// Test child cloning
+	{
+        tracef("Test child cloning");
 		auto a = new Node();
 		a.addChild(new Node());
 		auto b = a.clone();
@@ -174,12 +176,10 @@ class Node : Tree!(Node), IDisposable
 	{
         import std.range: retro;
 
-		if (children.length)
+		if (children.length > 0)
 		{
-            /* foreach here can throw a segfault: children already disposed of?
-                Let GC do its thing*/
-            //foreach ( c; retro (children) )
-			//	c.dispose();
+            foreach ( c; retro (children) )
+				c.dispose();
 			children.length = 0; // prevent multiple calls.
 		}
 	}
@@ -200,9 +200,7 @@ class Node : Tree!(Node), IDisposable
 	 * Get / set the rotation of this Node (as an axis-angle vector) relative to its parent's rotation. */
 	vec3 getRotation()
 	{
-		/* TODO: return transform.rotation.toAxis(); */
-        vec3 v;
-        return v;
+        return transform.rotation.to_axisAngle();
 	}
 	quat getRotationQuatrn()
 	{
@@ -396,11 +394,14 @@ class Node : Tree!(Node), IDisposable
 	 * This should be called whenever a Node has its transformation matrix changed.
 	 * This function is used internally by the engine usually doesn't need to be called manually. */
 	package void setWorldDirty()
-	{	if (!transform.worldDirty)
-		{	transform.worldDirty=true;
-			foreach(c; children)
+	{
+        if (!transform.worldDirty)
+		{
+            transform.worldDirty=true;
+			foreach(ref c; children)
 				c.setWorldDirty();
-	}	}
+        }
+	}
 
 	/*
 	 * Calculate the value of the worldPosition, worldRotation, and worldScale. */
@@ -500,7 +501,10 @@ class Node : Tree!(Node), IDisposable
     	assert(transform.worldDirty || !transform.worldDirty);
     }
 	unittest
-	{	bool hasTransform = true;
+	{
+        tracef("Test Node/Scene creation and addChild()");
+
+        bool hasTransform = true;
         Node a = new Node(hasTransform);
 		Node b = new Node(a);
 		Node c = new Node(a);
@@ -510,6 +514,7 @@ class Node : Tree!(Node), IDisposable
 		Scene s = new Scene();
 		Node d = new Node();
 		s.addChild(d);
+        s.removeChild(d);//Not removing child causes a segfault, because dispose() is called after end of scope somehow
 	}
 
 

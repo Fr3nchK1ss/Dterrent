@@ -93,7 +93,7 @@ class Window : IRenderTarget
                 flags |= SDL_WINDOW_FULLSCREEN;
         }
 
-        sdlWindow = SDL_CreateWindow("DT3RR3NT",
+        sdlWindow = SDL_CreateWindow("DTERRENT",
                                   cast(int) SDL_WINDOWPOS_UNDEFINED,
                                   cast(int) SDL_WINDOWPOS_UNDEFINED,
                                   cast(int) winWidth,
