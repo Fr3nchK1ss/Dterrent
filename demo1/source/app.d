@@ -16,20 +16,18 @@ void main()
 {
     bool dragging;
     bool running = true;
+    enum FPS = 90; // Target FPS
 
-	// Init and create window
-	dterrent.system.init();
+    /******* INIT SDL, libs, engine *******/
+    dterrent.system.init();
     auto window = Window.getInstance();
 
-    //auto scene = new TerrainDemo();
-
-    /********** FPS count **********/
-    enum FPS = 90; // Target FPS
     immutable perfFrequency = SDL_GetPerformanceFrequency();
-    // (counter ticks / seconds) / (frames / second) = counter ticks / frame
-    immutable counterTicksAvailablePerFrame = perfFrequency / FPS;
+    immutable counterTicksAvailablePerFrame = perfFrequency / FPS;// (ticks/sec)/(F/sec)=tick/F
     //trace ("perfFrequency " ~ to!string(perfFrequency));
     //trace ("counterTicksAvailablePerFrame " ~ to!string(counterTicksAvailablePerFrame));
+
+    /********** Nested funcs **********/
 
     /**
      * Update Gui every second
@@ -39,23 +37,43 @@ void main()
         import std.math: floor;
         static int updateCountDown = 0;
 
-        if (updateCountDown == 0)
+        if (updateCountDown == FPS)
         {
-            Window.getInstance().setCaption("Dterrent"
-                ~ "   -   current FPS = "
-                ~ to!string(FPS)
-                ~ "   -   max FPS = "
-                ~ to!string(floor(cast(float)(counterTicksAvailablePerFrame) / drawDelay * FPS)));
-            updateCountDown = FPS;
+            //trace ("drawDelay " ~ to!string(drawDelay));
 
-        } else {
-            updateCountDown--;
+            window.setCaption("Dterrent"
+                ~ "   -   target FPS = "
+                ~ to!string(FPS)
+                ~ "   -   possible FPS = "
+                ~ to!string(floor(cast(float)(counterTicksAvailablePerFrame) / drawDelay * FPS)));
+            updateCountDown = 0;
+
         }
+        else
+            ++updateCountDown;
     }
+
+    /**
+     * Introduce a draw delay in the game loop if necessary
+     */
+    void delayLoop( float drawDelay )
+    {
+        if( drawDelay > counterTicksAvailablePerFrame )
+            SDL_Delay(0); // Draw AFAP
+        else
+            SDL_Delay (cast(uint)
+             ( (counterTicksAvailablePerFrame - drawDelay) * 1000/perfFrequency )
+            );
+    }
+
+    /******* GAME *******/
+
+    //auto scene = new TerrainDemo();
 
     mainLoop: while (running) {
         immutable frameStart = SDL_GetPerformanceCounter();
 
+        // SDL_Event
         for (SDL_Event e;  SDL_PollEvent(&e); ) {
             switch (e.type)
             {
@@ -71,20 +89,13 @@ void main()
         //draw();
 
         immutable drawDelay = SDL_GetPerformanceCounter() - frameStart;
-        //trace ("drawDelay " ~ to!string(drawDelay));
-        if( drawDelay > counterTicksAvailablePerFrame ) {
-            // Not enough time to draw!
-            SDL_Delay(0);
-        } else {
-            // Do not draw too fast
-            SDL_Delay (cast(uint)
-                ( (counterTicksAvailablePerFrame - drawDelay) * 1000/perfFrequency));
-        }
-
+        delayLoop( drawDelay );
         updateGUI ( drawDelay );
-
     }
+
+
 
     // destroy window and stop system
 	dterrent.system.stop();
+
 }
