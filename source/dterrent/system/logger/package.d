@@ -6,8 +6,6 @@
 
 module dterrent.system.logger;
 
-public
-{
-	import dterrent.system.logger.teelogger;
-	import dterrent.system.logger.consolelogger;
-}
+public import dterrent.system.logger.teelogger,
+			dterrent.system.logger.consolelogger;
+

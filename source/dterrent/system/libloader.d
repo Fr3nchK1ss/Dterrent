@@ -14,7 +14,6 @@ import bindbc.openal;
 import bindbc.freetype;
 import bindbc.opengl;
 
-
 /* Mixins declarations */
 /**
  * Log errors when external libraries fail to load.
@@ -25,34 +24,37 @@ import bindbc.opengl;
  */
 mixin template mxtpl_logResult(E, E validVersion, string libName)
 {
-	void logResult(immutable E libVersion, immutable LogLevel level)
+    void logResult(immutable E libVersion, immutable LogLevel level)
     {
-        if(libVersion != validVersion)
+        if (libVersion != validVersion)
         {
-    		if( libVersion == E.badLibrary ) {
-    			/* Usually this means that either the library or one of its dependencies could not be found.*/
-    			log(level, libName ~ " not found.");
-    		}
-    		else if ( libVersion == E.noLibrary ) {
-    			/* e.g., an SDL 2.0.2 library loaded by an SDL 2.0.10 configuration.*/
-    		          log(level, "The system was able to find and successfully load " ~ libName
-    						~" but one or more symbols were missing."
-    						~" This usually indicates that the loaded library is of a lower API"
-    						~" version than expected.");
-    		}
+            if (libVersion == E.badLibrary)
+            {
+                /* Usually this means that either the library or one of its dependencies could not be found.*/
+                log(level, libName ~ " not found.");
+            }
+            else if (libVersion == E.noLibrary)
+            {
+                /* e.g., an SDL 2.0.2 library loaded by an SDL 2.0.10 configuration.*/
+                log(level, "The system was able to find and successfully load "
+                        ~ libName ~ " but one or more symbols were missing."
+                        ~ " This usually indicates that the loaded library is of a lower API"
+                        ~ " version than expected.");
+            }
             else
-                log(level, libName ~" failed to load.\n");
+                log(level, libName ~ " failed to load.\n");
         }
         else
-            tracef (libName ~" version %s loaded", libVersion);
-	}
+            tracef(libName ~ " version %s loaded", libVersion);
+    }
 
 }
 
 /**
  * Try to loads all necessary Dterrent libs
  */
-void loadAll() {
+void loadAll()
+{
 
     /**
      * To understand the template params, the SDLSupport enum looks like:
@@ -69,39 +71,40 @@ void loadAll() {
      * ...
      */
     mixin mxtpl_logResult!(SDLSupport, sdlSupport, "SDL");
-    logResult( loadSDL(), LogLevel.fatal );// throw a fatal Error if loading fails
+    logResult(loadSDL(), LogLevel.fatal); // throw a fatal Error if loading fails
 
     mixin mxtpl_logResult!(SDLImageSupport, sdlImageSupport, "SDLImage");
-    logResult( loadSDLImage(), LogLevel.fatal );// throw
+    logResult(loadSDLImage(), LogLevel.fatal); // throw
 
     mixin mxtpl_logResult!(ALSupport, ALSupport.al11, "OpenAL");
-    logResult( loadOpenAL(), LogLevel.warning );// do not throw
+    logResult(loadOpenAL(), LogLevel.warning); // do not throw
 
     mixin mxtpl_logResult!(FTSupport, ftSupport, "FreeType");
-    logResult( loadFreeType(), LogLevel.warning );
+    logResult(loadFreeType(), LogLevel.warning);
 
-    import std.stdio: writeln;
+    import std.stdio : writeln;
+
     writeln("");
 }
 
 void loadOpenGL()
 {
     mixin mxtpl_logResult!(GLSupport, GLSupport.gl46, "OpenGL");
-    logResult( bindbc.opengl.loadOpenGL(), LogLevel.fatal );
+    logResult(bindbc.opengl.loadOpenGL(), LogLevel.fatal);
 
-    import std.stdio: writeln;
+    import std.stdio : writeln;
+
     writeln("");
 }
-
 
 bool isOpenALLoaded()
 {
     return bindbc.openal.isOpenALLoaded();
 }
 
+void unloadAll()
+{
 
-void unloadAll(){
-    
     unloadOpenGL();
     unloadSDL();
     unloadOpenAL();

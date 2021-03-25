@@ -26,15 +26,14 @@ import yage.scene.scene;
 import yage.resource.manager;
 +/
 
-
-Tid system_thread; 		// reference to thread that called init, typically the main thread
+Tid system_thread; // reference to thread that called init, typically the main thread
 bool isSoundON = true;
-
 
 /* Load external libs */
 void init()
 {
-    import std.datetime.stopwatch : StopWatch, AutoStart;
+	import std.datetime.stopwatch : StopWatch, AutoStart;
+
 	auto stopWatch = StopWatch(AutoStart.yes);
 
 	// Init variables
@@ -44,35 +43,37 @@ void init()
 	// Load external libraries
 	libloader.loadAll();
 
-    if (libloader.isOpenALLoaded())
-    {
-        try{
-            // Create OpenAL device, context, and start sound processing thread.
-            SoundContext.init();
-        } catch (OpenALException e){
-            isSoundON = false;
-        }
-    }
+	if (libloader.isOpenALLoaded())
+	{
+		try
+		{
+			// Create OpenAL device, context, and start sound processing thread.
+			SoundContext.init();
+		}
+		catch (OpenALException e)
+		{
+			isSoundON = false;
+		}
+	}
 
 	stopWatch.stop();
 	infof("Dterrent initialized in %s msecs", stopWatch.peek.total!"msecs");
 
 }
 
-
 /**
  * Perform a clean stop of the engine
  */
 void stop()
 {
-    /**
+	/**
      * The assert is useful to ensure that rendering functions aren't called from
      * other threads. Always returns false if called before System.init()
      */
 	assert(thisTid() == system_thread);
 
 	SoundContext.deInit(); // stop the sound thread
-    /+
+	/+
 	// TODO FIX THIS
 	//SDL_WM_GrabInput(SDL_GRAB_OFF);
 	SDL_ShowCursor(true);
@@ -84,26 +85,27 @@ void stop()
 
 	ResourceManager.dispose();
     +/
-    
-    if (Window.getInstance())
-        Window.getInstance().destroy();
 
-    libloader.unloadAll();
+	if (Window.getInstance())
+		Window.getInstance().destroy();
+
+	libloader.unloadAll();
 
 }
 
-
 struct Credit
-{	string name;
+{
+	string name;
 	string handle;
 	string code;
 	string license;
 	static Credit opCall(string name, string handle, string code, string license)
-	{	Credit result;
-		result.name=name;
-		result.handle=handle;
-		result.code=code;
-		result.license=license;
+	{
+		Credit result;
+		result.name = name;
+		result.handle = handle;
+		result.code = code;
+		result.license = license;
 		return result;
 	}
 }
@@ -111,7 +113,7 @@ struct Credit
 Credit[] getCredits()
 {
 	return [
-	    Credit("Eric Poggel", "JoeCoder", "Original Yage engine", "LGPL v3"),
-        Credit("Fr3nchK1ss", "Fr3nchK1ss", "Dterrent engine", "LGLP v3"),
+		Credit("Eric Poggel", "JoeCoder", "Original Yage engine", "LGPL v3"),
+		Credit("Fr3nchK1ss", "Fr3nchK1ss", "Dterrent engine", "LGLP v3"),
 	];
 }

@@ -9,9 +9,9 @@ import dterrent.system.logger;
 
 import std.exception : enforce;
 import std.string;
-import std.math: floor;
-import std.algorithm: max;
-import std.conv: to;
+import std.math : floor;
+import std.algorithm : max;
+import std.conv : to;
 
 import gl3n.linalg;
 import dterrent.core.interfaces;
@@ -43,9 +43,9 @@ import yage.resource.sound;
  */
 class SoundContext
 {
-	private static const int MAX_SOURCES = 32;		// arbitrary.  TODO: Make this a variable
-	private static const int UPDATE_FREQUENCY = 30;	// arbitrary
-    private static SoundSource[] sources;
+	private static const int MAX_SOURCES = 32; // arbitrary.  TODO: Make this a variable
+	private static const int UPDATE_FREQUENCY = 30; // arbitrary
+	private static SoundSource[] sources;
 
 	private static ALCcontext* context = null;
 
@@ -56,7 +56,8 @@ class SoundContext
 	{
 		// Get a device
 		device = OpenAL.openDevice(null); // device is a package variable defined in openal.d
-		tracef("Using OpenAL Device '%s'.", fromStringz(OpenAL.getString(device, ALC_DEVICE_SPECIFIER)));
+		tracef("Using OpenAL Device '%s'.",
+				fromStringz(OpenAL.getString(device, ALC_DEVICE_SPECIFIER)));
 
 		// Get a context
 		context = OpenAL.createContext(device, null);
@@ -66,21 +67,20 @@ class SoundContext
 		// Note that we only query the number of mono sources.
 		int max_sources;
 		OpenAL.getIntegerv(device, ALC_MONO_SOURCES, 1, &max_sources);
-        enforce (max_sources > 0, "OpenAL reports no sound sources available.
+		enforce(max_sources > 0, "OpenAL reports no sound sources available.
         Please close any other applications which may be using sound resources.");
 
 		if (max_sources > MAX_SOURCES)
 			max_sources = MAX_SOURCES;
 
 		// Create as many soures as we can, up to a limit
-		for (int i=0; i < max_sources; i++)
+		for (int i = 0; i < max_sources; i++)
 		{
-				auto source = new SoundSource();
-				sources ~= source;
+			auto source = new SoundSource();
+			sources ~= source;
 		}
 
 	}
-
 
 	/**
 	 * Delete the dedvice and context,
@@ -90,7 +90,7 @@ class SoundContext
 		if (context)
 		{
 
-            foreach (source; sources)
+			foreach (source; sources)
 				if (source) // in case of the unpredictible order of the gc.
 					source.dispose();
 
@@ -106,10 +106,10 @@ class SoundContext
 	 * Get the OpenAL Context. */
 	static ALCcontext* getContext()
 	{
-        return context;
+		return context;
 	}
 
-/+
+	/+
 	/*
 	 * Called by the sound thread to update all active source's sound buffers. */
 	static void updateSounds(SoundList list)
@@ -173,7 +173,6 @@ class SoundContext
 +/
 }
 
-
 /*
  * Represents an OpenAL source (an instance of a sound playing).
  * Typical hardware can only support a small number of these, so SoundNodes map and unmap to these sources as needed.
@@ -182,24 +181,24 @@ private class SoundSource : IDisposable
 {
 
 	package uint al_source;
-/+
+	/+
 	private SoundNode soundNode;	// It would be good if this became unnecessary.  It's currently required to set the playback timer.
 +/
 	private Sound sound;
 
-	private float  pitch;
-	private float  radius;			// The radius of the Sound that plays.
-	private float  volume;
-	private bool   looping = false;
-	private vec3  position;
-	private vec3  velocity;
+	private float pitch;
+	private float radius; // The radius of the Sound that plays.
+	private float volume;
+	private bool looping = false;
+	private vec3 position;
+	private vec3 velocity;
 
-	private ulong  size;			// number of buffers that we use at one time, either sounds' buffers per second,
-									// or less if the sound is less than one second long.
-	private bool   enqueue = true;	// Keep enqueue'ing more buffers, false if no loop and at end of track.
-	private ulong  buffer_start;	// the first buffer in the array of currently enqueue'd buffers
-	private ulong  buffer_end;		// the last buffer in the array of currently enqueue'd buffers
-	private ulong  to_process;		// the number of buffers to queue next time.
+	private ulong size; // number of buffers that we use at one time, either sounds' buffers per second,
+	// or less if the sound is less than one second long.
+	private bool enqueue = true; // Keep enqueue'ing more buffers, false if no loop and at end of track.
+	private ulong buffer_start; // the first buffer in the array of currently enqueue'd buffers
+	private ulong buffer_end; // the last buffer in the array of currently enqueue'd buffers
+	private ulong to_process; // the number of buffers to queue next time.
 
 	/*
 	 * Create the OpenAL Source. */
@@ -219,12 +218,12 @@ private class SoundSource : IDisposable
 	{
 		if (al_source)
 		{
-            //unbind();
+			//unbind();
 			alDeleteSources(1, &al_source);
 			al_source = 0;
 		}
 	}
-/+
+	/+
 	/*
 	 * SoundNodes act as a virtual instance of a real SoundSource
 	 * This function ensures the SoundSource matches all of the parameters of the SoundNode.
@@ -311,25 +310,26 @@ private class SoundSource : IDisposable
 	void seek(double seconds)
 	{
 		int buffers_per_second = sound.getBuffersPerSecond();
-		int new_start = cast(int)floor(seconds*buffers_per_second);
-		float fraction = seconds*buffers_per_second - new_start;
-        enforce (new_start <= sound.getBuffersLength(),
-			     "SoundSource.seek(" ~ to!string(seconds) ~ ") is invalid for ''" ~ sound.getSource() ~ "'.");
+		int new_start = cast(int) floor(seconds * buffers_per_second);
+		float fraction = seconds * buffers_per_second - new_start;
+		enforce(new_start <= sound.getBuffersLength(),
+				"SoundSource.seek(" ~ to!string(
+					seconds) ~ ") is invalid for ''" ~ sound.getSource() ~ "'.");
 
 		// Delete any leftover buffers
 
-        OpenAL.sourceStop(al_source);
+		OpenAL.sourceStop(al_source);
 
-    	unqueueBuffers();
-    	buffer_start = buffer_end = new_start;
-    	enqueue = true;
-    	updateBuffers();
+		unqueueBuffers();
+		buffer_start = buffer_end = new_start;
+		enqueue = true;
+		updateBuffers();
 
 		OpenAL.sourcePlay(al_source);
-		OpenAL.sourcef(al_source, AL_SEC_OFFSET, fraction/buffers_per_second);
+		OpenAL.sourcef(al_source, AL_SEC_OFFSET, fraction / buffers_per_second);
 		// Stdout.format("seeked to ", (new_start+fraction)/buffers_per_second);
 	}
-/+
+	/+
 	/*
 	 * Tell the position of the playback of the current sound file, in seconds. */
 	double tell()
@@ -348,26 +348,27 @@ private class SoundSource : IDisposable
 	 * This is normally called automatically from the SoundNode's scene's sound thread.
 	 * This will fail silently if the SoundNode has no sound or no scene. */
 	void updateBuffers()
-	in {
+	in
+	{
 		//assert(soundNode);
 		assert(sound);
 	}
 	do
 	{
-        if (enqueue)
+		if (enqueue)
 		{
 			//Stdout.format("updating buffers for %s", sound.getSource());
 			// Count buffers processed since last time we queue'd more
 			int processed;
 			OpenAL.getSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
-			to_process = max(processed, size-(buffer_end-buffer_start));
+			to_process = max(processed, size - (buffer_end - buffer_start));
 
 			// Update the buffers for this source if more than 1/4th have been used.
-			if (to_process > size/4)
+			if (to_process > size / 4)
 			{
 				// If looping and our buffer has reached the end of the track
 				ulong blength = sound.getBuffersLength();
-				if (!looping && buffer_end+to_process >= blength)
+				if (!looping && buffer_end + to_process >= blength)
 					to_process = blength - buffer_end;
 
 				// Unqueue old buffers
@@ -375,10 +376,11 @@ private class SoundSource : IDisposable
 
 				// Enqueue as many buffers as what are available
 				sound.allocBuffers(buffer_end, to_process);
-				OpenAL.sourceQueueBuffers(al_source, to!(int)(to_process), sound.getBuffers(buffer_end, buffer_end+to_process).ptr);
+				OpenAL.sourceQueueBuffers(al_source, to!(int)(to_process),
+						sound.getBuffers(buffer_end, buffer_end + to_process).ptr);
 
-				buffer_start+= processed;
-				buffer_end	+= to_process;
+				buffer_start += processed;
+				buffer_end += to_process;
 			}
 		}
 
@@ -386,8 +388,8 @@ private class SoundSource : IDisposable
 		// Is this block still necessary if everything behaves as it should?
 		int state;
 		OpenAL.getSourcei(al_source, AL_SOURCE_STATE, &state);
-		if (state==AL_STOPPED || state==AL_INITIAL)
-		{	// but it should be, resume playback
+		if (state == AL_STOPPED || state == AL_INITIAL)
+		{ // but it should be, resume playback
 			if (enqueue)
 				OpenAL.sourcePlay(al_source);
 			else // we've reached the end of the track
@@ -398,7 +400,7 @@ private class SoundSource : IDisposable
 				buffer_start = buffer_end = 0;
 
 				if (looping)
-				{	//play
+				{ //play
 					OpenAL.sourcePlay(al_source);
 					enqueue = true;
 				}
@@ -406,9 +408,8 @@ private class SoundSource : IDisposable
 		}
 
 		// This is required for tracks with their total number of buffers equal to size.
-		if (enqueue)
-			// If not looping and our buffer has reached the end of the track
-			if (!looping && buffer_end+1 >= sound.getBuffersLength())
+		if (enqueue) // If not looping and our buffer has reached the end of the track
+			if (!looping && buffer_end + 1 >= sound.getBuffersLength())
 				enqueue = false;
 
 	}
@@ -420,11 +421,12 @@ private class SoundSource : IDisposable
 	{
 		if (sound)
 		{
-            int processed;
+			int processed;
 			OpenAL.getSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
-			OpenAL.sourceUnqueueBuffers(al_source, processed, sound.getBuffers(buffer_start, buffer_start+processed).ptr);
+			OpenAL.sourceUnqueueBuffers(al_source, processed,
+					sound.getBuffers(buffer_start, buffer_start + processed).ptr);
 			sound.freeBuffers(buffer_start, processed);
-        }
+		}
 	}
 
 }

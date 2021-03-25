@@ -1,8 +1,8 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+    Authors: @Fr3nchK1ss
+    Copyright: proprietary / contact dev
 
-	Minimal Dterrent test application
+    Minimal Dterrent test application
  */
 
 module demo1;
@@ -10,7 +10,6 @@ module demo1;
 import std.conv;
 import dterrent;
 import bindbc.sdl;
-
 
 void main()
 {
@@ -23,7 +22,7 @@ void main()
     auto window = Window.getInstance();
 
     immutable perfFrequency = SDL_GetPerformanceFrequency();
-    immutable counterTicksAvailablePerFrame = perfFrequency / FPS;// (ticks/sec)/(F/sec)=tick/F
+    immutable counterTicksAvailablePerFrame = perfFrequency / FPS; // (ticks/sec)/(F/sec)=tick/F
     //trace ("perfFrequency " ~ to!string(perfFrequency));
     //trace ("counterTicksAvailablePerFrame " ~ to!string(counterTicksAvailablePerFrame));
 
@@ -34,18 +33,19 @@ void main()
      */
     void updateGUI(float drawDelay)
     {
-        import std.math: floor;
+        import std.math : floor;
+
         static int updateCountDown = 0;
 
         if (updateCountDown == FPS)
         {
             //trace ("drawDelay " ~ to!string(drawDelay));
 
-            window.setCaption("Dterrent"
-                ~ "   -   target FPS = "
-                ~ to!string(FPS)
-                ~ "   -   possible FPS = "
-                ~ to!string(floor(cast(float)(counterTicksAvailablePerFrame) / drawDelay * FPS)));
+            window.setCaption("Dterrent" 
+                ~ "   -   target FPS = " 
+                ~ to!string(FPS) 
+                ~ "   -   possible FPS = " ~ to!string(
+                    floor(cast(float)(counterTicksAvailablePerFrame) / drawDelay * FPS)));
             updateCountDown = 0;
 
         }
@@ -56,46 +56,44 @@ void main()
     /**
      * Introduce a draw delay in the game loop if necessary
      */
-    void delayLoop( float drawDelay )
+    void delayLoop(float drawDelay)
     {
-        if( drawDelay > counterTicksAvailablePerFrame )
+        if (drawDelay > counterTicksAvailablePerFrame)
             SDL_Delay(0); // Draw AFAP
         else
-            SDL_Delay (cast(uint)
-             ( (counterTicksAvailablePerFrame - drawDelay) * 1000/perfFrequency )
-            );
+            SDL_Delay(cast(uint)((counterTicksAvailablePerFrame - drawDelay) * 1000 / perfFrequency));
     }
 
     /******* GAME *******/
 
     //auto scene = new TerrainDemo();
 
-    mainLoop: while (running) {
+    mainLoop: while (running)
+    {
         immutable frameStart = SDL_GetPerformanceCounter();
 
         // SDL_Event
-        for (SDL_Event e;  SDL_PollEvent(&e); ) {
+        for (SDL_Event e; SDL_PollEvent(&e);)
+        {
             switch (e.type)
             {
-                case SDL_QUIT:
-                    critical ("QUIT signal");
-                    running = false;
-                    break mainLoop;
-                default:
-                    break;
+            case SDL_QUIT:
+                critical("QUIT signal");
+                running = false;
+                break mainLoop;
+            default:
+                break;
             }
         }
 
         //draw();
 
         immutable drawDelay = SDL_GetPerformanceCounter() - frameStart;
-        delayLoop( drawDelay );
-        updateGUI ( drawDelay );
+        delayLoop(drawDelay);
+        updateGUI(drawDelay);
     }
 
-
-
     // destroy window and stop system
-	dterrent.system.stop();
+    dterrent.system.stop();
 
 }

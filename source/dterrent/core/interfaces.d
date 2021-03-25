@@ -4,14 +4,14 @@
 
  */
 
- module dterrent.core.interfaces;
+module dterrent.core.interfaces;
 
- /**
+/**
  * An interface for anything that can be cloned via a clone() method.
  */
 interface ICloneable
 {
-    Object clone(); ///
+	Object clone(); ///
 }
 
 /**
@@ -26,7 +26,6 @@ interface IDisposable
 	void dispose();
 }
 
-
 /**
  * Anything that implements this can act as a target for anything that
  * renders using OpenGL operations.
@@ -36,7 +35,6 @@ interface IRenderTarget
 	ulong getWidth();
 	ulong getHeight();
 }
-
 
 /**
  * An interface for anything that implements timekeeping functions.

@@ -11,7 +11,6 @@ import std.format;
 import dterrent.core;
 import dterrent.scene.scene;
 
-
 /+
 import tango.core.Thread;
 import tango.math.Math;
@@ -22,7 +21,6 @@ import yage.scene.all;
 import yage.system.log;
 import std.range;
 +/
-
 
 /**
  * Nodes are used for building scene graphs in Yage.
@@ -55,43 +53,45 @@ import std.range;
 class Node : Tree!(Node), IDisposable
 {
 	package static ContiguousTransforms orphanTransforms; // stores transforms for nodes that don't belong to any scene
-	package int transformIndex=-1;	// Index of the transform structure in the scene's nodeTransforms array.
-	package Scene scene;			// The Scene that this node belongs to.
-	Event!() onUpdate;	/// If set, call this function instead of the standard update function.
+	package int transformIndex = -1; // Index of the transform structure in the scene's nodeTransforms array.
+	package Scene scene; // The Scene that this node belongs to.
+	Event!() onUpdate; /// If set, call this function instead of the standard update function.
 
-    // Contract programming
+	// Contract programming
 	invariant()
-	{	assert(parent !is this);
+	{
+		assert(parent !is this);
 	}
 
+	this()
+	{
+	}
 
-    this () {}
-
-    /**
+	/**
      * To create a node with a default Transform. Used in unittests
      */
-    this (bool hasTransform)
-    {
-        if (hasTransform)
-            transformIndex = orphanTransforms.addNew(this);
-    }
-
+	this(bool hasTransform)
+	{
+		if (hasTransform)
+			transformIndex = orphanTransforms.addNew(this);
+	}
 
 	this(Node parent) /// ditto
 	{
-        if (parent)
+		if (parent)
 		{
 			parent.addChild(this); // calls ancestorChange()
-            // If parent has a Transform, give child a Transform
-            if (parent.transformIndex != -1)
-                transformIndex = orphanTransforms.addNew(this);
+			// If parent has a Transform, give child a Transform
+			if (parent.transformIndex != -1)
+				transformIndex = orphanTransforms.addNew(this);
 
-		} else
+		}
+		else
 			ancestorChange(null);
 
-        onUpdate.listenersChanged = (){
-            this.transform().onUpdateSet = this.onUpdate.length > 0;
-        };
+		onUpdate.listenersChanged = () {
+			this.transform().onUpdateSet = this.onUpdate.length > 0;
+		};
 
 	}
 
@@ -103,9 +103,10 @@ class Node : Tree!(Node), IDisposable
 	 *     child = The Node to add.
 	 * Returns: The child Node that was added.  Templating is used to ensure the return type is exactly the same.*/
 	T addChild(T : Node)(T child)
-	{	assert(child !is this);
+	{
+		assert(child !is this);
 		assert(child !is parent);
-		assert(child.transformIndex==-1 || child.transform().node is child);
+		assert(child.transformIndex == -1 || child.transform().node is child);
 
 		auto oldParent = child.getParent();
 		super.addChild(child);
@@ -133,35 +134,38 @@ class Node : Tree!(Node), IDisposable
 	 * Params:
 	 *     cloneChildren = recursively clone children (and descendants) and add them as children to the new Node.
 	 * Returns: The cloned Node. */
-	Node clone(bool cloneChildren=true, Node destination=null) /// ditto
+	Node clone(bool cloneChildren = true, Node destination = null) /// ditto
 	{
 
 		if (!destination)
-			destination = cast(Node)this.classinfo.create(); // why does new typeof(this) fail?
+			destination = cast(Node) this.classinfo.create(); // why does new typeof(this) fail?
 		assert(destination);
 
-        if (destination.transformIndex != -1)
-        {
-    		*destination.transform = *transform;
-    		destination.transform.node = destination;
-    		destination.transform.parent = destination.parent ? destination.parent.transform() : null;
-    		destination.transform.worldDirty = true;
-        }
+		if (destination.transformIndex != -1)
+		{
+			*destination.transform = *transform;
+			destination.transform.node = destination;
+			destination.transform.parent = destination.parent ? destination.parent.transform()
+				: null;
+			destination.transform.worldDirty = true;
+		}
 
-        /* TODO: Events aren't cloned.
+		/* TODO: Events aren't cloned.
 		destination.onUpdate = onUpdate;*/
 
 		if (cloneChildren)
 			foreach (c; this.children)
-			{	auto copy = cast(Node)c.classinfo.create();
+			{
+				auto copy = cast(Node) c.classinfo.create();
 				destination.addChild(c.clone(true, copy));
 			}
 
 		return destination;
 	}
+
 	unittest
 	{
-        tracef("Test child cloning");
+		tracef("Test child cloning");
 		auto a = new Node();
 		a.addChild(new Node());
 		auto b = a.clone();
@@ -174,11 +178,11 @@ class Node : Tree!(Node), IDisposable
      */
 	override void dispose()
 	{
-        import std.range: retro;
+		import std.range : retro;
 
 		if (children.length > 0)
 		{
-            foreach ( c; retro (children) )
+			foreach (c; retro(children))
 				c.dispose();
 			children.length = 0; // prevent multiple calls.
 		}
@@ -190,6 +194,7 @@ class Node : Tree!(Node), IDisposable
 	{
 		return transform.position;
 	}
+
 	void setPosition(vec3 position) /// ditto
 	{
 		setWorldDirty();
@@ -200,12 +205,14 @@ class Node : Tree!(Node), IDisposable
 	 * Get / set the rotation of this Node (as an axis-angle vector) relative to its parent's rotation. */
 	vec3 getRotation()
 	{
-        return transform.rotation.to_axisAngle();
+		return transform.rotation.to_axisAngle();
 	}
+
 	quat getRotationQuatrn()
 	{
 		return transform.rotation;
 	}
+
 	void setRotation(vec3 axisAngle) /// ditto
 	{
 		setWorldDirty();
@@ -224,26 +231,27 @@ class Node : Tree!(Node), IDisposable
 	{
 		return transform.scale;
 	}
+
 	void setScale(vec3 scale) /// ditto
 	{
 		setWorldDirty();
 		transform.scale = scale;
 	}
 
-
 	/**
 	 * Get / set the linear velocity this Node relative to its parent's velocity. */
 	vec3 getVelocity()
 	{
 		if (scene)
-			return transform.velocityDelta/scene.increment;
+			return transform.velocityDelta / scene.increment;
 		else
 			return transform.velocityDelta;
 	}
+
 	void setVelocity(vec3 velocity) /// ditto
 	{
 		if (scene)
-			transform.velocityDelta = velocity*scene.increment;
+			transform.velocityDelta = velocity * scene.increment;
 		else
 			transform.velocityDelta = velocity;
 	}
@@ -254,6 +262,7 @@ class Node : Tree!(Node), IDisposable
 	{
 		return transform.angularVelocity;
 	}
+
 	void setAngularVelocity(vec3 axisAngle) /// ditto
 	{
 		transform.angularVelocity = axisAngle;
@@ -262,13 +271,14 @@ class Node : Tree!(Node), IDisposable
 		else
 			transform.angularVelocityDelta = axisAngle.toQuatrn();*/
 	}
+
 	unittest
 	{
-        bool hasTransform = true;
-        Node n = new Node(hasTransform);
+		bool hasTransform = true;
+		Node n = new Node(hasTransform);
 
-        vec3 av1 = vec3(-.5f, .5f, 1.0f);
-        n.setAngularVelocity(av1);
+		vec3 av1 = vec3(-.5f, .5f, 1.0f);
+		n.setAngularVelocity(av1);
 		vec3 av2 = n.getAngularVelocity();
 		/* TODO assert(av1.almostEqual(av2), format("%s", av2.v));*/
 	}
@@ -282,23 +292,26 @@ class Node : Tree!(Node), IDisposable
 			calcWorld();
 		return transform.worldPosition; // TODO: optimize
 	}
+
 	vec3 getWorldRotation() /// ditto
 	{
 		calcWorld();
 		/* TODO return transform.worldRotation.toAxis();*/
-        return vec3(0);
+		return vec3(0);
 	}
+
 	quat getWorldRotationQuatrn() /// ditto
 	{
 		calcWorld();
 		return transform.worldRotation;
 	}
+
 	vec3 getWorldScale() /// ditto
 	{
 		calcWorld();
 		return transform.worldScale;
 	}
-/+
+	/+
 	/// Bug:  Doesn't take parent's rotation or scale into account
 	vec3 getWorldVelocity()
 	{
@@ -373,20 +386,21 @@ class Node : Tree!(Node), IDisposable
 +/
 	/// Get the Scene at the top of the tree that this node belongs to, or null if this is part of a scene-less node tree.
 	Scene getScene()
-	{	return scene;
+	{
+		return scene;
 	}
 
 	/**
 	* Get the struct containing this Node's transformation data.
     */
-	package Node.Transform* transform() {
-		assert (!scene || (transformIndex>=0 && transformIndex<scene.nodeTransforms.length),
-            format("transformIndex: %d", transformIndex));
+	package Node.Transform* transform()
+	{
+		assert(!scene || (transformIndex >= 0 && transformIndex < scene.nodeTransforms.length),
+				format("transformIndex: %d", transformIndex));
 
-        //trace("index = ", transformIndex);
-		return scene ?
-			&scene.nodeTransforms.transforms[transformIndex] :
-                &orphanTransforms.transforms[transformIndex];
+		//trace("index = ", transformIndex);
+		return scene ? &scene.nodeTransforms.transforms[transformIndex]
+			: &orphanTransforms.transforms[transformIndex];
 	}
 
 	/*
@@ -395,12 +409,12 @@ class Node : Tree!(Node), IDisposable
 	 * This function is used internally by the engine usually doesn't need to be called manually. */
 	package void setWorldDirty()
 	{
-        if (!transform.worldDirty)
+		if (!transform.worldDirty)
 		{
-            transform.worldDirty=true;
-			foreach(ref c; children)
+			transform.worldDirty = true;
+			foreach (ref c; children)
 				c.setWorldDirty();
-        }
+		}
 	}
 
 	/*
@@ -410,20 +424,23 @@ class Node : Tree!(Node), IDisposable
 		if (transform.worldDirty)
 		{
 			if (parent && parent !is scene)
-			{	parent.calcWorld();
+			{
+				parent.calcWorld();
 
 				//transform.worldPosition = transform.position * parent.transform.worldScale;
-				if (parent.transform.worldRotation != quat(vec4(1)) ) // Because rotation is more expensive
+				if (parent.transform.worldRotation != quat(vec4(1))) // Because rotation is more expensive
 				{
-                    /* TODO transform.worldPosition = transform.worldPosition.rotate(parent.transform.worldRotation);*/
+					/* TODO transform.worldPosition = transform.worldPosition.rotate(parent.transform.worldRotation);*/
 					transform.worldRotation = parent.transform.worldRotation * transform.rotation;
-				} else
+				}
+				else
 					transform.worldRotation = transform.rotation;
 
 				transform.worldPosition += parent.transform.worldPosition;
 				/* TODO transform.worldScale =  parent.transform.worldScale * transform.scale;*/
 
-			} else
+			}
+			else
 			{
 				transform.worldPosition = transform.position;
 				transform.worldRotation = transform.rotation;
@@ -432,9 +449,10 @@ class Node : Tree!(Node), IDisposable
 			transform.worldDirty = false;
 		}
 	}
+
 	unittest
 	{
-        bool hasTransform = true;
+		bool hasTransform = true;
 		Node a = new Node(hasTransform);
 		a.setPosition(vec3(3, 0, 0));
 		a.setRotation(vec3(0, 3.1415927, 0));
@@ -455,57 +473,64 @@ class Node : Tree!(Node), IDisposable
 	 * since the world transformation values should always be dirty after an ancestor change.
 	 * Params:
 	 *    oldAncestor = The ancestor that was previously one above the top node of the tree that had its parent changed. */
-     protected void ancestorChange(Node oldAncestor)
-     {
-    	Scene newScene = parent ? parent.scene : null;
-    	auto transforms = newScene ? &newScene.nodeTransforms : &orphanTransforms;
-    	auto oldTransforms = scene ? &scene.nodeTransforms : &orphanTransforms;
+	protected void ancestorChange(Node oldAncestor)
+	{
+		Scene newScene = parent ? parent.scene : null;
+		auto transforms = newScene ? &newScene.nodeTransforms : &orphanTransforms;
+		auto oldTransforms = scene ? &scene.nodeTransforms : &orphanTransforms;
 
-    	if (transforms !is oldTransforms) // changing scene of existing node
-    	{
-    		if (transformIndex==-1) // previously didn't belong to a scene
-    			transformIndex = transforms.addNew(this);
-    		else
-    		{	assert(oldTransforms.transforms[transformIndex].node is this);
-    			int newIndex = transforms.add(transform(), this);
-    			oldTransforms.remove(transformIndex);
-    			transformIndex = newIndex;
-    		}
-    		scene = newScene;
+		if (transforms !is oldTransforms) // changing scene of existing node
+		{
+			if (transformIndex == -1) // previously didn't belong to a scene
+				transformIndex = transforms.addNew(this);
+			else
+			{
+				assert(oldTransforms.transforms[transformIndex].node is this);
+				int newIndex = transforms.add(transform(), this);
+				oldTransforms.remove(transformIndex);
+				transformIndex = newIndex;
+			}
+			scene = newScene;
 
-    		// Update the incrementing values to match the scene increment.
-    		float incrementChange = (newScene ? newScene.increment : 1f) / (scene ? scene.increment : 1f);
-    		transform.velocityDelta *= incrementChange;
-    		/* TODO: transform.angularVelocityDelta.multiplyAngle(incrementChange);*/
-    	}
-        /* TODO: verify else if !!! Does not seem to cover all cases !!!*/
-    	else if (transformIndex==-1) // a brand new node
-    		transformIndex = transforms.addNew(this);
+			// Update the incrementing values to match the scene increment.
+			float incrementChange = (newScene ? newScene.increment : 1f) / (scene
+					? scene.increment : 1f);
+			transform.velocityDelta *= incrementChange;
+			/* TODO: transform.angularVelocityDelta.multiplyAngle(incrementChange);*/
+		}
+		/* TODO: verify else if !!! Does not seem to cover all cases !!!*/
+		else if (transformIndex == -1) // a brand new node
+			transformIndex = transforms.addNew(this);
 
-    	assert(transforms.transforms[transformIndex].node is this);
+		assert(transforms.transforms[transformIndex].node is this);
 
-    	transform().parent = (parent && parent !is scene) ? parent.transform() : null;
-    	transform().worldDirty = true;
+		transform().parent = (parent && parent !is scene) ? parent.transform() : null;
+		transform().worldDirty = true;
 
-    	foreach(c; children)
-    		c.ancestorChange(oldAncestor); // breaks the assertions below!  But how?
+		foreach (c; children)
+			c.ancestorChange(oldAncestor); // breaks the assertions below!  But how?
 
-    	debug {
-                    if (scene) {
-                            assert(0<=transformIndex && transformIndex < transforms.length);
-                    } else {
-                            assert(transformIndex != -1);
-                    }
-    	}
-    	assert(transform); // assert it is accessible
-    	assert(transform.worldDirty || !transform.worldDirty);
-    }
+		debug
+		{
+			if (scene)
+			{
+				assert(0 <= transformIndex && transformIndex < transforms.length);
+			}
+			else
+			{
+				assert(transformIndex != -1);
+			}
+		}
+		assert(transform); // assert it is accessible
+		assert(transform.worldDirty || !transform.worldDirty);
+	}
+
 	unittest
 	{
-        tracef("Test Node/Scene creation and addChild()");
+		tracef("Test Node/Scene creation and addChild()");
 
-        bool hasTransform = true;
-        Node a = new Node(hasTransform);
+		bool hasTransform = true;
+		Node a = new Node(hasTransform);
 		Node b = new Node(a);
 		Node c = new Node(a);
 		b.addChild(c);
@@ -514,43 +539,43 @@ class Node : Tree!(Node), IDisposable
 		Scene s = new Scene();
 		Node d = new Node();
 		s.addChild(d);
-        s.removeChild(d);//Not removing child causes a segfault, because dispose() is called after end of scope somehow
+		s.removeChild(d); //Not removing child causes a segfault, because dispose() is called after end of scope somehow
 	}
-
 
 	/*
 	 * A node's transformation values are stored in a consecutive array in its scene, for better cache performance
 	 * Or if, it has no scene, this structure is allocated on the heap. */
 	struct Transform
-	{	vec3 position;
+	{
+		vec3 position;
 		quat rotation;
 		vec3 scale = vec3(1);
 
-		vec3 velocityDelta;	// Velocity times the scene increment, for faster updating.
-		vec3 angularVelocity;	// Stored as a vector to allow storing rotations beyond -PI to PI
+		vec3 velocityDelta; // Velocity times the scene increment, for faster updating.
+		vec3 angularVelocity; // Stored as a vector to allow storing rotations beyond -PI to PI
 		quat angularVelocityDelta; // Stored as a quaternion for faster updating.
 
 		vec3 worldPosition;
 		quat worldRotation;
 		vec3 worldScale = vec3(1);
 
-		float cullRadius=0;	// TODO: unionize these with the vectors above for tighter packing once we switch to simd.
+		float cullRadius = 0; // TODO: unionize these with the vectors above for tighter packing once we switch to simd.
 		bool worldDirty = true;
 		bool onUpdateSet = false;
 
 		Node.Transform* parent; // For fast lookups when calculating world transforms
-		Node node;				// Pointer back to the node.
+		Node node; // Pointer back to the node.
 
 		static Transform opCall()
-		{	Transform result;
+		{
+			Transform result;
 			return result;
 		}
 
-
-        int opCmp( Transform rd)
-        {
-            return 0;
-        }
+		int opCmp(Transform rd)
+		{
+			return 0;
+		}
 	}
 
 	/**
@@ -561,28 +586,35 @@ class Node : Tree!(Node), IDisposable
 		Node.Transform[] transforms; // TODO: Make ArrayBuilder or equivalent after migrating to D2.
 
 		int add(Node.Transform* transform, Node n)
-		{	transforms ~= *transform;
-			transforms[length-1].node = n;
+		{
+			transforms ~= *transform;
+			transforms[length - 1].node = n;
 			return cast(int)(transforms.length) - 1;
 		}
 
 		int addNew(Node n)
-		{	transforms ~= Transform();
-			transforms[length-1].node = n;
+		{
+			transforms ~= Transform();
+			transforms[length - 1].node = n;
 			return cast(int)(transforms.length) - 1;
 		}
 
 		void remove(int index)
-		{	assert(transforms[index].node.transformIndex == index, format("%d, %d, %s", transforms[index].node.transformIndex, index, transforms[index].node.classinfo.name));
-			if (index != transforms.length-1)
-			{	transforms[index] = transforms[length-1]; // move another node no top of the one removed
-				transforms[index].node.transformIndex = index;  // update the index of the moved node.
+		{
+			assert(transforms[index].node.transformIndex == index, format("%d, %d, %s",
+					transforms[index].node.transformIndex, index,
+					transforms[index].node.classinfo.name));
+			if (index != transforms.length - 1)
+			{
+				transforms[index] = transforms[length - 1]; // move another node no top of the one removed
+				transforms[index].node.transformIndex = index; // update the index of the moved node.
 			}
 			transforms.length = transforms.length - 1;
 		}
 
 		ulong length()
-		{	return transforms.length;
+		{
+			return transforms.length;
 		}
 	}
 

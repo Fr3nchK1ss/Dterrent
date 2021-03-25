@@ -13,14 +13,13 @@ public import bindbc.openal;
 
 package(dterrent.system.sound) ALCdevice* device = null;
 
-
 class OpenALException : Exception
 {
-    this (string msg) {
+    this(string msg)
+    {
         super(msg);
     }
 }
-
 
 /**
  * Class to bundle OpenAL
@@ -30,7 +29,7 @@ struct OpenAL
     /**
      * wrapper around OpenAL functions in order to add error checking
      */
-    static R execute(alias FUNC, R=ReturnType!FUNC)(Parameters!FUNC func_args)
+    static R execute(alias FUNC, R = ReturnType!FUNC)(Parameters!FUNC func_args)
     {
         /**
          * (Nested) Check for error with a regular al call
@@ -38,25 +37,26 @@ struct OpenAL
         void checkAlError()
         {
             int error = alGetError();
-            if(error != AL_NO_ERROR)
+            if (error != AL_NO_ERROR)
             {
-                final switch(error)
+                final switch (error)
                 {
-                    case AL_INVALID_NAME:
-                        critical("AL_INVALID_NAME: a bad name (ID) was passed\n");
-                        break;
-                    case AL_INVALID_ENUM:
-                        critical("AL_INVALID_ENUM: an invalid enum value was passed\n");
-                        break;
-                    case AL_INVALID_VALUE:
-                        critical("AL_INVALID_VALUE: an invalid value was passed\n");
-                        break;
-                    case AL_INVALID_OPERATION:
-                        critical("AL_INVALID_OPERATION: the requested operation is not valid\"\n");
-                        break;
-                    case AL_OUT_OF_MEMORY:
-                        critical("AL_OUT_OF_MEMORY: the requested operation resulted in OpenAL running out of memory\n");
-                        break;
+                case AL_INVALID_NAME:
+                    critical("AL_INVALID_NAME: a bad name (ID) was passed\n");
+                    break;
+                case AL_INVALID_ENUM:
+                    critical("AL_INVALID_ENUM: an invalid enum value was passed\n");
+                    break;
+                case AL_INVALID_VALUE:
+                    critical("AL_INVALID_VALUE: an invalid value was passed\n");
+                    break;
+                case AL_INVALID_OPERATION:
+                    critical("AL_INVALID_OPERATION: the requested operation is not valid\"\n");
+                    break;
+                case AL_OUT_OF_MEMORY:
+                    critical(
+                            "AL_OUT_OF_MEMORY: the requested operation resulted in OpenAL running out of memory\n");
+                    break;
                 }
                 throw new OpenALException("OpenAL failure");
             }
@@ -68,25 +68,25 @@ struct OpenAL
         void checkAlcError(ALCdevice* device)
         {
             int error = alcGetError(device);
-            if(error != ALC_NO_ERROR)
+            if (error != ALC_NO_ERROR)
             {
-                final switch(error)
+                final switch (error)
                 {
-                    case ALC_INVALID_VALUE:
-                        critical ("ALC_INVALID_VALUE: an invalid value was passed\n");
-                        break;
-                    case ALC_INVALID_DEVICE:
-                        critical ("ALC_INVALID_DEVICE: a bad device was passed\n");
-                        break;
-                    case ALC_INVALID_CONTEXT:
-                        critical ("ALC_INVALID_CONTEXT: a bad context was passed\n");
-                        break;
-                    case ALC_INVALID_ENUM:
-                        critical ("ALC_INVALID_ENUM: an unknown enum value was passed\n");
-                        break;
-                    case ALC_OUT_OF_MEMORY:
-                        critical ("ALC_OUT_OF_MEMORY: an unknown enum value was passed\n");
-                        break;
+                case ALC_INVALID_VALUE:
+                    critical("ALC_INVALID_VALUE: an invalid value was passed\n");
+                    break;
+                case ALC_INVALID_DEVICE:
+                    critical("ALC_INVALID_DEVICE: a bad device was passed\n");
+                    break;
+                case ALC_INVALID_CONTEXT:
+                    critical("ALC_INVALID_CONTEXT: a bad context was passed\n");
+                    break;
+                case ALC_INVALID_ENUM:
+                    critical("ALC_INVALID_ENUM: an unknown enum value was passed\n");
+                    break;
+                case ALC_OUT_OF_MEMORY:
+                    critical("ALC_OUT_OF_MEMORY: an unknown enum value was passed\n");
+                    break;
                 }
                 throw new OpenALException("OpenAL context failure");
             }
@@ -96,10 +96,10 @@ struct OpenAL
         alGetError(); // clear any previous errors.
 
         // Call FUNC
-        static if (is (R == void))
+        static if (is(R == void))
         {
             FUNC(func_args);
-            static if (FUNC.stringof[0..3] != "alc")
+            static if (FUNC.stringof[0 .. 3] != "alc")
                 checkAlError();
             else
                 checkAlcError(device);
@@ -110,7 +110,7 @@ struct OpenAL
 
             //trace( FUNC.stringof ~" returned: " ~ R.stringof ~ " " ~ to!string(result));
 
-            static if (FUNC.stringof[0..3] != "alc")
+            static if (FUNC.stringof[0 .. 3] != "alc")
                 checkAlError();
             else
                 checkAlcError(device);
@@ -119,32 +119,32 @@ struct OpenAL
         }
     }
 
-	/**
+    /**
 	 * Wrappers for each OpenAL function (unfinished).
      */
-	alias bufferData = execute!(alBufferData) ; /// ditto
-	alias deleteBuffers = execute!(alDeleteBuffers) ; /// ditto
-	alias deleteSources = execute!(alDeleteSources) ; /// ditto
-	alias genBuffers = execute!(alGenBuffers) ; /// ditto
-	alias genSources = execute!(alGenSources); /// ditto
-	alias getSourcef = execute!(alGetSourcef); /// ditto
-	alias getSourcei = execute!(alGetSourcei); /// ditto
-	alias isBuffer = execute!(alIsBuffer) ; /// ditto
-	alias listenerfv = execute!(alListenerfv) ; /// ditto
-	alias sourcef = execute!(alSourcef) ; /// ditto
-	alias sourcefv = execute!(alSourcefv) ; /// ditto
-	alias sourcePlay = execute!(alSourcePlay) ; /// ditto
-	alias sourcePause = execute!(alSourcePause) ; /// ditto
-	alias sourceQueueBuffers = execute!(alSourceQueueBuffers) ; /// ditto
-	alias sourceStop = execute!(alSourceStop) ; /// ditto
-	alias sourceUnqueueBuffers = execute!(alSourceUnqueueBuffers) ; /// ditto
+    alias bufferData = execute!(alBufferData); /// ditto
+    alias deleteBuffers = execute!(alDeleteBuffers); /// ditto
+    alias deleteSources = execute!(alDeleteSources); /// ditto
+    alias genBuffers = execute!(alGenBuffers); /// ditto
+    alias genSources = execute!(alGenSources); /// ditto
+    alias getSourcef = execute!(alGetSourcef); /// ditto
+    alias getSourcei = execute!(alGetSourcei); /// ditto
+    alias isBuffer = execute!(alIsBuffer); /// ditto
+    alias listenerfv = execute!(alListenerfv); /// ditto
+    alias sourcef = execute!(alSourcef); /// ditto
+    alias sourcefv = execute!(alSourcefv); /// ditto
+    alias sourcePlay = execute!(alSourcePlay); /// ditto
+    alias sourcePause = execute!(alSourcePause); /// ditto
+    alias sourceQueueBuffers = execute!(alSourceQueueBuffers); /// ditto
+    alias sourceStop = execute!(alSourceStop); /// ditto
+    alias sourceUnqueueBuffers = execute!(alSourceUnqueueBuffers); /// ditto
     // Context aliases
-	alias closeDevice = execute!(alcCloseDevice) ; /// ditto
-	alias createContext = execute!(alcCreateContext) ; /// ditto
-	alias destroyContext = execute!(alcDestroyContext) ; /// ditto
-	alias getIntegerv = execute!(alcGetIntegerv) ; /// ditto
-	alias getString = execute!(alcGetString) ; /// ditto
-	alias makeContextCurrent = execute!(alcMakeContextCurrent) ; /// ditto
-	alias openDevice = execute!(alcOpenDevice) ; /// ditto
+    alias closeDevice = execute!(alcCloseDevice); /// ditto
+    alias createContext = execute!(alcCreateContext); /// ditto
+    alias destroyContext = execute!(alcDestroyContext); /// ditto
+    alias getIntegerv = execute!(alcGetIntegerv); /// ditto
+    alias getString = execute!(alcGetString); /// ditto
+    alias makeContextCurrent = execute!(alcMakeContextCurrent); /// ditto
+    alias openDevice = execute!(alcOpenDevice); /// ditto
 
 }

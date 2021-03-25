@@ -9,8 +9,9 @@ import dterrent.system.logger;
 
 import std.stdio;
 import std.format;
-import std.exception: enforce;
+import std.exception : enforce;
 import dterrent.system.sound;
+
 /+
 import derelict.vorbis.vorbis;
 import derelict.vorbis.enc;
@@ -30,17 +31,17 @@ import yage.scene.sound;
 class Sound
 {
 
-	protected ubyte		fileformat;  		// wav, ogg, etc.
-	protected SoundFile	sound_file;		// see doc for SoundFile
-	protected uint		al_format;		// Number of channels and uncompressed bit-rate.
+	protected ubyte fileformat; // wav, ogg, etc.
+	protected SoundFile sound_file; // see doc for SoundFile
+	protected uint al_format; // Number of channels and uncompressed bit-rate.
 
-	protected uint[]	buffers;		// holds the OpenAL id name of each buffer for the song
-	protected uint[]	buffers_ref;	// counts how many SoundNodes are using each buffer
-	protected uint		buffer_num;		// total number of buffers
-	protected uint		buffer_size;	// size of each buffer in bytes, always a multiple of 4.
-	protected uint		buffers_per_sec = 25;// ideal is between 5 and 500.  Higher values give more seek precision.
-									// but limit the number of sounds that can be playing concurrently.
-/+
+	protected uint[] buffers; // holds the OpenAL id name of each buffer for the song
+	protected uint[] buffers_ref; // counts how many SoundNodes are using each buffer
+	protected uint buffer_num; // total number of buffers
+	protected uint buffer_size; // size of each buffer in bytes, always a multiple of 4.
+	protected uint buffers_per_sec = 25; // ideal is between 5 and 500.  Higher values give more seek precision.
+	// but limit the number of sounds that can be playing concurrently.
+	/+
 	/**
 	 * Load a sound from a file.
 	 * Note that the file is not closed until the destructor is called.
@@ -87,26 +88,30 @@ class Sound
 +/
 	/// Get the frequency of the sound (often 22050 or 44100)
 	uint getFrequency()
-	{	return sound_file.frequency;
+	{
+		return sound_file.frequency;
 	}
 
 	/**
 	 * Get a pointer to the array of OpenAL buffer id's used for this sound.
 	 * allocBuffers() and freeBuffers() are used to assign and release buffers from the sound source.*/
 	uint[] getBuffers()
-	{	return buffers;
+	{
+		return buffers;
 	}
 
 	/// Get the number of buffers this sound was divided into
 	ulong getBuffersLength()
-	{	return buffers.length;
+	{
+		return buffers.length;
 	}
 
 	/// Get the number of buffers created for each second of this sound
 	uint getBuffersPerSecond()
-	{	return buffers_per_sec;
+	{
+		return buffers_per_sec;
 	}
-/+
+	/+
 	/// Get the length of the sound in seconds
 	double getLength()
 	{	return (8.0*sound_file.size)/(sound_file.bits*sound_file.frequency*sound_file.channels);
@@ -120,19 +125,20 @@ class Sound
 	/// Get the filename this Sound was loaded from.
 	string getSource()
 	{
-        return sound_file.source;
+		return sound_file.source;
 	}
 
 	/// TODO: convert last to be number, to be consistent with alloBuffers and FreeBuffers?
 	uint[] getBuffers(ulong first, ulong last)
-	{	first = first % buffers.length;
+	{
+		first = first % buffers.length;
 		last = last % buffers.length;
 
 		// If we're wrapping around
 		if (first > last)
-			return buffers[first..buffers.length]~buffers[0..last];
+			return buffers[first .. buffers.length] ~ buffers[0 .. last];
 		else
-			return buffers[first..last];
+			return buffers[first .. last];
 	}
 
 	/**
@@ -141,18 +147,20 @@ class Sound
 	 * and the openAL buffers are destroyed when the reference counter reaches zero.
 	 * This can accept buffers outside of the range of buffers and will wrap them around to support easy looping. */
 	void allocBuffers(ulong first, ulong number)
-	{	// Loop through each of the buffers that will be returned
-		for (ulong j=first; j<first+number; j++)
-		{	// Allow inputs that are out of range to loop around
+	{ // Loop through each of the buffers that will be returned
+		for (ulong j = first; j < first + number; j++)
+		{ // Allow inputs that are out of range to loop around
 			ulong i = j % buffers.length;
 
 			// If this buffer hasn't yet been bound
-			if (buffers_ref[i]==0)
+			if (buffers_ref[i] == 0)
 			{
 				synchronized
-				{	OpenAL.genBuffers(1, &buffers[i]);
-					ubyte[] data = sound_file.getBuffer(i*buffer_size, buffer_size);
-					OpenAL.bufferData(buffers[i], al_format, &data[0], cast(ALsizei)data.length, getFrequency());
+				{
+					OpenAL.genBuffers(1, &buffers[i]);
+					ubyte[] data = sound_file.getBuffer(i * buffer_size, buffer_size);
+					OpenAL.bufferData(buffers[i], al_format, &data[0],
+							cast(ALsizei) data.length, getFrequency());
 				}
 			}
 			// Increment reference count
@@ -166,43 +174,45 @@ class Sound
 	 * and will release it once it's at zero. */
 	void freeBuffers(ulong first, int number)
 	{
-		for (ulong j=first; j<first+number; j++)
-		{	// Allow inputs that are out of range to loop around
+		for (ulong j = first; j < first + number; j++)
+		{ // Allow inputs that are out of range to loop around
 			ulong i = j % buffers.length;
 
 			// Decrement reference count
-			if (buffers_ref[i]==0)
+			if (buffers_ref[i] == 0)
 				continue;
 			buffers_ref[i]--;
 
 			// If this buffer has no references to it, delete it
-			if (buffers_ref[i]==0)
+			if (buffers_ref[i] == 0)
 			{
 				synchronized
-                {
+				{
 					if (OpenAL.isBuffer(buffers[i]))
 					{
-                        OpenAL.deleteBuffers(1, &buffers[i]); /// TODO, delete multiple buffers at once?
-						if ( OpenAL.isBuffer(buffers[i]) )
-                            warning("OpenAL Sound buffer %d of '%s' could not be deleted;
-                            probably because it is in use.\n", i, sound_file.source);
+						OpenAL.deleteBuffers(1, &buffers[i]); /// TODO, delete multiple buffers at once?
+						if (OpenAL.isBuffer(buffers[i]))
+							warning("OpenAL Sound buffer %d of '%s' could not be deleted;
+                            probably because it is in use.\n",
+									i, sound_file.source);
 
-					} else
-                        warning("OpenAL Sound buffer %d of '%s' cannot be deleted because it is has not been allocated.\n",
-							i, sound_file.source);
-                }
-    		}
-        }
+					}
+					else
+						warning(
+								"OpenAL Sound buffer %d of '%s' cannot be deleted because it is has not been allocated.\n",
+								i, sound_file.source);
+				}
+			}
+		}
 	}
 
 	/// Print useful information about the loaded sound file.
 	override string toString()
 	{
-        return format("size of buffer: %l bytes\n size of buffer: %l bytes\n buffers per second: %l bytes\n",
-			buffer_size, buffer_num, buffers_per_sec);
+		return format("size of buffer: %l bytes\n size of buffer: %l bytes\n buffers per second: %l bytes\n",
+				buffer_size, buffer_num, buffers_per_sec);
 	}
 }
-
 
 /** SoundFile is an abstract class for loading and seeking
  *  sound data in a multimedia file.  A file is opened and closed
@@ -212,36 +222,33 @@ class Sound
  */
 private abstract class SoundFile
 {
-	ushort	channels;
-	int		frequency;	// 22050hz, 44100hz?
-	int		bits;		// 8bit, 16bit?
-	int		size;		// in bytes
-	string	source;
-	string[]comments;	// Header info from audio file (not used yet)
+	ushort channels;
+	int frequency; // 22050hz, 44100hz?
+	int bits; // 8bit, 16bit?
+	int size; // in bytes
+	string source;
+	string[] comments; // Header info from audio file (not used yet)
 
 	/// Load the given file and parse its headers
 	this(string filename)
-	{	source = filename;
+	{
+		source = filename;
 		//Log.info("Loading sound '" ~ source ~ "'.");
 	}
 
 	/** Return a buffer of uncompressed sound data.
 	 *  Both parameters are measured in bytes. */
 	ubyte[] getBuffer(ulong offset, uint size)
-	{	return null;
+	{
+		return null;
 	}
 
 	/// Print useful information about the loaded sound file.
 	override string toString()
 	{
-        return  format("Sound: '%s'\n"~
-			                  "channels: %d\n"~
-			                  "sample rate: %d\n"~
-			                  "sample bits: %d\n"~
-			                  "sample length: %d bytes\n"~
-			                  "sample length: %f seconds\n",
-			                  source, channels, frequency, bits, size,
-			                  (8.0*size)/(bits*frequency*channels));
+		return format("Sound: '%s'\n" ~ "channels: %d\n" ~ "sample rate: %d\n"
+				~ "sample bits: %d\n" ~ "sample length: %d bytes\n" ~ "sample length: %f seconds\n",
+				source, channels, frequency, bits, size, (8.0 * size) / (bits * frequency * channels));
 	}
 }
 

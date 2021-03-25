@@ -1,8 +1,8 @@
 /**
- * Copyright:  (c) 2005-2009 Eric Poggel
- * Authors:	   Eric Poggel
- * License:	   <a href="lgpl3.txt">LGPL v3</a>
- *
+	Authors: Eric Poggel, Fr3nchK1ss
+	Copyright: proprietary / contact dev
+
+	This class is a rewrite of yage3D Event class.
  */
 
 module dterrent.core.event;
@@ -18,37 +18,42 @@ module dterrent.core.event;
 struct Event(T...)
 {
 	void delegate() listenersChanged; /// Called after the listeners are added or removed.
-    /*
+	/*
      * A set. Associative arrays are copied by ref, so when one event is assigned to another,
      * they will both point ot the same listeners.
      */
 	protected bool[void delegate(T)] listeners;
 
 	void addListener(void delegate(T) listener)
-	{	listeners[listener] = true;
+	{
+		listeners[listener] = true;
 		if (listenersChanged)
 			listenersChanged();
 	}
 
 	/// Call all the functions in the listeners list.
 	void opCall(T args)
-	{	foreach (func, unused; listeners)
-		func(args);
+	{
+		foreach (func, unused; listeners)
+			func(args);
 	}
 
 	ulong length()
-	{	return listeners.length;
+	{
+		return listeners.length;
 	}
 
 	void removeListener(void delegate(T) listener)
-	{	listeners.remove(listener);
+	{
+		listeners.remove(listener);
 		if (listenersChanged)
 			listenersChanged();
 	}
 
 	void removeAll()
-	{	foreach (key; listeners.keys)
-		listeners.remove(key);
+	{
+		foreach (key; listeners.keys)
+			listeners.remove(key);
 		if (listenersChanged)
 			listenersChanged();
 	}

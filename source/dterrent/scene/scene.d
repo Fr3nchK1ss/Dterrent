@@ -10,6 +10,7 @@ module dterrent.scene.scene;
 import core.sync.mutex;
 import dterrent.scene.node;
 import dterrent.core;
+
 /+
 import tango.core.Thread;
 import tango.time.Clock;
@@ -51,19 +52,19 @@ class Scene : Node
 {
 
 	// TODO: move these to a struct
-	Color ambient;				/// The color of the scene's global ambient light; defaults to black.
-	Color backgroundColor;		/// Background color rendered for this Scene when no skybox is specified.  TODO: allow transparency.
-	Color fogColor;				/// Color of global scene fog, when fog is enabled.
-	float fogDensity = 0.1;		/// The thickness (density) of the Scene's global fog, when fog is enabled.  Depending on the scale of your scene, decent values range between .001 and .1.
-	bool  fogEnabled = false;	/// Get / set whether global distance fog is enabled for this scene.
-								/// For best results, use no skybox and set the clear color the same as the fog color.
-								/// For improved performance, set the cameras' max view distance to just beyond
-								/// where objects become completely obscured by the fog. */
-	float speedOfSound = 343f;	/// Speed of sound in units/second
+	Color ambient; /// The color of the scene's global ambient light; defaults to black.
+	Color backgroundColor; /// Background color rendered for this Scene when no skybox is specified.  TODO: allow transparency.
+	Color fogColor; /// Color of global scene fog, when fog is enabled.
+	float fogDensity = 0.1; /// The thickness (density) of the Scene's global fog, when fog is enabled.  Depending on the scale of your scene, decent values range between .001 and .1.
+	bool fogEnabled = false; /// Get / set whether global distance fog is enabled for this scene.
+	/// For best results, use no skybox and set the clear color the same as the fog color.
+	/// For improved performance, set the cameras' max view distance to just beyond
+	/// where objects become completely obscured by the fog. */
+	float speedOfSound = 343f; /// Speed of sound in units/second
 
 	package ContiguousTransforms nodeTransforms;
 
-/+
+	/+
 	protected CameraNode[CameraNode] cameras;
 	protected LightNode[LightNode] lights;
 	protected SoundNode[SoundNode] sounds;
@@ -77,8 +78,8 @@ class Scene : Node
 
 	protected static Scene[Scene] all_scenes; // TODO: Prevents old scenes from being removed!
 
-	package float increment= 1/60f;;
-
+	package float increment = 1 / 60f;
+	;
 
 	/**
 	 * Construct an empty Scene.
@@ -91,11 +92,11 @@ class Scene : Node
 
 		//assert(transform().node.transformIndex == transformIndex);
 
-		ambient	= Color("#333333"); // OpenGL default global ambient light.
-		backgroundColor = Color("black");	// OpenGL default clear color
+		ambient = Color("#333333"); // OpenGL default global ambient light.
+		backgroundColor = Color("black"); // OpenGL default clear color
 		fogColor = Color("gray");
 
-        mutex = new Mutex();
+		mutex = new Mutex();
 		camerasMutex = new Mutex();
 		lightsMutex = new Mutex();
 		soundsMutex = new Mutex();
@@ -106,7 +107,8 @@ class Scene : Node
 	/**
 	 * Call dispose() on destruction. */
 	~this()
-	{	dispose();
+	{
+		dispose();
 	}
 
 	/**
@@ -115,10 +117,10 @@ class Scene : Node
 	 * Params:
 	 *     children = recursively clone children (and descendants) and add them as children to the new Node.
 	 * Returns: The cloned Node. */
-    alias Node.clone clone; // for the call to super.clone
-	Scene clone(bool children=false, Scene destination=null)
+	alias Node.clone clone; // for the call to super.clone
+	Scene clone(bool children = false, Scene destination = null)
 	{
-		auto result = cast(Scene)super.clone(children, destination);
+		auto result = cast(Scene) super.clone(children, destination);
 		result.ambient = ambient;
 		result.speedOfSound = speedOfSound;
 		result.backgroundColor = backgroundColor;
@@ -132,8 +134,10 @@ class Scene : Node
 	/**
 	 * Overridden to pause the scene update and sound threads and to remove this instance from the array of all scenes. */
 	override void dispose()
-	{	if (this in all_scenes) // repeater will be null if dispose has already been called.
-		{	super.dispose();
+	{
+		if (this in all_scenes) // repeater will be null if dispose has already been called.
+		{
+			super.dispose();
 			//cameras = null;
 			//lights = null;
 			//sounds = null;
@@ -151,12 +155,15 @@ class Scene : Node
 	 * For convenience, lock() and unlock() calls may be nested.  Subsequent lock() calls will still maintain the lock,
 	 * but unlocking will only occur after unlock() has been called an equal number of times. */
 	void lock()
-	{	mutex.lock();
+	{
+		mutex.lock();
 	}
+
 	void unlock() /// ditto
-	{	mutex.unlock();
+	{
+		mutex.unlock();
 	}
-/+
+	/+
 	/**
 	 * Update all Nodes in the scene by delta seconds.
 	 * This function is typically called automatically at a set interval from the scene's updateThread once scene.play() is called.
@@ -288,13 +295,15 @@ class Scene : Node
 	/*
 	 * Used internally. */
 	Object getSoundsMutex()
-	{	return soundsMutex;
+	{
+		return soundsMutex;
 	}
 
 	/**
 	 * Get a self-indexed array of all senes that are active (have been constructed but not disposed). */
 	static Scene[Scene] getAllScenes()
-	{	return all_scenes;
+	{
+		return all_scenes;
 	}
 
 }

@@ -9,7 +9,6 @@ module dterrent.system.logger.teelogger;
 public import std.experimental.logger; //to use global sharedLog
 import dterrent.system.logger.consolelogger;
 
-
 /**
   A simple logger to write simultaneously into a console and a file.
 
@@ -18,14 +17,14 @@ import dterrent.system.logger.consolelogger;
 class DtrtLogger : MultiLogger
 {
 
-    this(LogLevel lv = LogLevel.all)
-    {
-      super(lv);
-      insertLogger("console", new ConsoleLogger());
-      insertLogger("file", new FileLogger(logFile, lv));
-    }
+  this(LogLevel lv = LogLevel.all)
+  {
+    super(lv);
+    insertLogger("console", new ConsoleLogger());
+    insertLogger("file", new FileLogger(logFile, lv));
+  }
 
 private:
-    immutable string logFile = "dterrent.log";
+  immutable string logFile = "dterrent.log";
 
 }

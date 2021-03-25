@@ -7,4 +7,4 @@
 module dterrent.scene;
 
 public import dterrent.scene.scene,
-              dterrent.scene.node;
+			dterrent.scene.node;

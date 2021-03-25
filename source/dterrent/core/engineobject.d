@@ -1,12 +1,11 @@
 /**
-	Authors: Fr3nchK1ss on github
+	Authors: Poggel / Fr3nchK1ss
 	Copyright: proprietary / contact dev
 
-	This class is a rewrite of yage3D Object2 class.
+	This class is a rewrite of yage3D EngineObject class.
  */
 
 module dterrent.core.engineobject;
-
 
 /**
  * Base class of some Dterrent objects.
@@ -19,8 +18,9 @@ class EngineObject
 
 	~this()
 	{
-        if (this in objectsReverse)
-		{	objects.remove(getId());
+		if (this in objectsReverse)
+		{
+			objects.remove(getId());
 			objectsReverse.remove(this);
 		}
 	}
@@ -31,14 +31,15 @@ class EngineObject
      */
 	string getId()
 	{
-        auto ptr = this in objectsReverse;
+		auto ptr = this in objectsReverse;
 		if (ptr)
 			return *ptr;
 		return "";
 	}
 
 	void setId(string id) /// ditto
-	{	if (id.length)
+	{
+		if (id.length)
 		{
 			// If id already exists on another object
 			auto ptr = id in objects;
@@ -55,7 +56,7 @@ class EngineObject
 		}
 		else if (this in objectsReverse)
 		{
-            objects.remove(getId());
+			objects.remove(getId());
 			objectsReverse.remove(this);
 		}
 	}
@@ -64,34 +65,38 @@ class EngineObject
 	 * Get the object previously assigned to the unique id string.
 	 * If no object exists, null will be returned. */
 	static EngineObject getById(string id)
-	{	auto ptr = id in objects;
+	{
+		auto ptr = id in objects;
 		if (ptr)
 			return *ptr;
 		return null;
 	}
 
 	unittest
-	{	class Foo : EngineObject {}
+	{
+		class Foo : EngineObject
+		{
+		}
 
 		Foo a = new Foo();
 		Foo b = new Foo();
 		a.setId("a");
 		b.setId("b");
-		assert(a.getId()=="a");
-		assert(b.getId()=="b");
+		assert(a.getId() == "a");
+		assert(b.getId() == "b");
 		b.setId("a");
-		assert(b.getId()=="a");
-		assert(a.getId()=="");
+		assert(b.getId() == "a");
+		assert(a.getId() == "");
 		b.setId("");
-		assert(b.getId()=="");
-		assert(objects.length==0);
-		assert(objectsReverse.length==0);
+		assert(b.getId() == "");
+		assert(objects.length == 0);
+		assert(objectsReverse.length == 0);
 
 		a.setId("a");
 		b.setId("b");
 		a.destroy();
 		b.destroy();
-		assert(objects.length==0);
-		assert(objectsReverse.length==0);
+		assert(objects.length == 0);
+		assert(objectsReverse.length == 0);
 	}
 }

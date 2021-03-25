@@ -10,7 +10,6 @@ module dterrent.core.tree;
 import dterrent.core.engineobject;
 import dterrent.core.array;
 
-
 /**
  * Implements an element that can be used in a tree, with parents and children.
  * Example:
@@ -23,9 +22,9 @@ import dterrent.core.array;
 class Tree(T) : EngineObject
 {
 
-	protected T parent;			// reference to parent
-	protected T[] children;		// array of this element's children.
-	protected int index=-1;		// index of this element in its parent's array, -1 if no parent.
+	protected T parent; // reference to parent
+	protected T[] children; // array of this element's children.
+	protected int index = -1; // index of this element in its parent's array, -1 if no parent.
 
 	/**
 	 * Add a child element.
@@ -44,14 +43,15 @@ class Tree(T) : EngineObject
 
 		// If child has an existing parent.
 		if (child.parent)
-		{	assert(child.parent.isChild(cast(S)child));
+		{
+			assert(child.parent.isChild(cast(S) child));
 			dterrent.core.array.remove(child.parent.children, child.index);
 		}
 
 		// Add as a child.
-		child.parent = cast(T)this;
-		children ~= cast(T)child;
-		child.index = cast(int)(children.length-1);
+		child.parent = cast(T) this;
+		children ~= cast(T) child;
+		child.index = cast(int)(children.length - 1);
 
 		return child;
 	}
@@ -70,35 +70,37 @@ class Tree(T) : EngineObject
 
 		if (child.index >= 0)
 		{
-            dterrent.core.array.remove(children, child.index, false);
+			dterrent.core.array.remove(children, child.index, false);
 			if (child.index < children.length) // update index of element that replaced child.
 				children[child.index].index = child.index;
 			child.index = -1; // so remove can't be called twice.
 			child.parent = null;
 		}
-		assert (!isChild(child));
+		assert(!isChild(child));
 
 		return child;
 	}
 
-
 	/// Get an array of this element's children.
 	T[] getChildren()
-	{	return children;
+	{
+		return children;
 	}
 
 	/**
 	 * Get / set the parent of this element (what it's attached to).
 	 * Setting a new parent removes it from its old parent's children and returns a self-reference. */
 	T getParent()
-	{	return parent;
+	{
+		return parent;
 	}
 
 	/**
 	 * Is elem a child of this element?
 	 * This function will also return false if elem is null. */
 	bool isChild(T elem)
-	{	if (!elem || elem.index < 0 || elem.index >= children.length)
+	{
+		if (!elem || elem.index < 0 || elem.index >= children.length)
 			return false;
 		return cast(bool)(children[elem.index] == elem);
 	}

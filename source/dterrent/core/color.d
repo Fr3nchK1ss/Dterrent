@@ -9,6 +9,7 @@ module dterrent.core.color;
 import std.algorithm.comparison;
 import std.string;
 import dterrent.core.math;
+
 /+
 import tango.io.Stdout;
 import tango.core.BitManip;
@@ -39,7 +40,7 @@ import std.format;
  */
 struct Color
 {
-	private static const real frac = 1.0f/255;
+	private static const real frac = 1.0f / 255;
 
 	static const Color BLACK = {0, 0, 0, 255};
 	static const Color BLUE = {0, 0, 255, 255};
@@ -60,61 +61,74 @@ struct Color
 	static const Color WHITE = {255, 255, 255, 255};
 	static const Color YELLOW = {255, 255, 0, 255};
 
-	union // this union breaks CTFE with this struct
-	{	struct { ubyte r, g, b, a; } /// Access each color component: TODO: test to ensure order is correct.
-		ubyte[4] ub;/// Get the Color as an array of ubyte
-		uint ui;	/// Get the Color as a uint
+	union  // this union breaks CTFE with this struct
+	{
+		struct
+		{
+			ubyte r, g, b, a;
+		} /// Access each color component: TODO: test to ensure order is correct.
+		ubyte[4] ub; /// Get the Color as an array of ubyte
+		uint ui; /// Get the Color as a uint
 	}
 
 	/**
 	 * Initialize from 3 or 4 values (red, green, blue, alpha).
 	 * Integer types rante from 0 to 255 and floating point types range from 0 to 1. */
-	static Color opCall(int r, int g,int b, int a=255)
-	{	Color res;
-		res.r=cast(ubyte)r;
-		res.g=cast(ubyte)g;
-		res.b=cast(ubyte)b;
-		res.a=cast(ubyte)a;
+	static Color opCall(int r, int g, int b, int a = 255)
+	{
+		Color res;
+		res.r = cast(ubyte) r;
+		res.g = cast(ubyte) g;
+		res.b = cast(ubyte) b;
+		res.a = cast(ubyte) a;
 		return res;
 	}
+
 	unittest
-	{	assert(Color(0x99663300) == Color(0, 0x33, 0x66, 0x99));
+	{
+		assert(Color(0x99663300) == Color(0, 0x33, 0x66, 0x99));
 	}
 
-	static Color opCall(float r, float g, float b, float a=1) /// ditto
-	{	Color res;
-		res.r=cast(ubyte)clamp(r*255, 0.0f, 255.0f);
-		res.g=cast(ubyte)clamp(g*255, 0.0f, 255.0f);
-		res.b=cast(ubyte)clamp(b*255, 0.0f, 255.0f);
-		res.a=cast(ubyte)clamp(a*255, 0.0f, 255.0f);
+	static Color opCall(float r, float g, float b, float a = 1) /// ditto
+	{
+		Color res;
+		res.r = cast(ubyte) clamp(r * 255, 0.0f, 255.0f);
+		res.g = cast(ubyte) clamp(g * 255, 0.0f, 255.0f);
+		res.b = cast(ubyte) clamp(b * 255, 0.0f, 255.0f);
+		res.a = cast(ubyte) clamp(a * 255, 0.0f, 255.0f);
 		return res;
 	}
 
 	static Color opCall(ubyte[] v) /// ditto
-	{	Color res;
-		for (int i=0; i<max(v.length, 4); i++)
+	{
+		Color res;
+		for (int i = 0; i < max(v.length, 4); i++)
 			res.ub[i] = cast(ubyte)(v[i]);
 		if (v.length < 4)
 			res.a = 255;
 		return res;
 	}
+
 	static Color opCall(int[] v) /// ditto
-	{	Color res;
-		for (int i=0; i<max(v.length, 4); i++)
+	{
+		Color res;
+		for (int i = 0; i < max(v.length, 4); i++)
 			res.ub[i] = cast(ubyte)(v[i]);
 		if (v.length < 4)
 			res.a = 255;
 		return res;
 	}
+
 	static Color opCall(float[] f) /// ditto
-	{	Color res;
-		for (int i=0; i<min(f.length, 4); i++)
-			res.ub[i] = cast(ubyte)clamp(f[i]*255, 0.0f, 255.0f);
+	{
+		Color res;
+		for (int i = 0; i < min(f.length, 4); i++)
+			res.ub[i] = cast(ubyte) clamp(f[i] * 255, 0.0f, 255.0f);
 		if (f.length < 4)
 			res.a = 255;
 		return res;
 	}
-    /+
+	/+
 	static Color opCall(vec3 v) /// ditto
 	{	return Color(v.v);
 	}
@@ -130,59 +144,83 @@ struct Color
 	 * pink, purple, red, transparent, violet, white, and yellow are supported.
 	 * See: <a href="http://www.w3schools.com/css/css_colornames.asp">CSS color names</a>*/
 	static Color opCall(uint ui)
-	{	Color res;
+	{
+		Color res;
 		res.ui = ui;
 		return res;
 	}
-
 
 	static Color opCall(string s)
 	{
 		// An english color name
 		if (s.length <= 20)
-		{	string lower = toLower(s);
-			switch (lower[0..s.length])
-			{	case "black":	return Color.BLACK;
-				case "blue":	return Color.BLUE;
-				case "brown":	return Color.BROWN;
-				case "cyan":	return Color.CYAN;
-				case "gold":	return Color.GOLD;
-				case "gray":
-				case "grey":	return Color.GRAY;
-				case "green":	return Color.GREEN;
-				case "indigo":	return Color.INDIGO;
-				case "magenta":	return Color.MAGENTA;
-				case "orange":	return Color.ORANGE;
-				case "pink":	return Color.PINK;
-				case "purple":	return Color.PURPLE;
-				case "red":		return Color.RED;
-				case "transparent":	return Color.TRANSPARENT;
-				case "violet":	return Color.VIOLET;
-				case "white":	return Color.WHITE;
-				case "yellow":	return Color.YELLOW;
-				default: break;
-		}	}
+		{
+			string lower = toLower(s);
+			switch (lower[0 .. s.length])
+			{
+			case "black":
+				return Color.BLACK;
+			case "blue":
+				return Color.BLUE;
+			case "brown":
+				return Color.BROWN;
+			case "cyan":
+				return Color.CYAN;
+			case "gold":
+				return Color.GOLD;
+			case "gray":
+			case "grey":
+				return Color.GRAY;
+			case "green":
+				return Color.GREEN;
+			case "indigo":
+				return Color.INDIGO;
+			case "magenta":
+				return Color.MAGENTA;
+			case "orange":
+				return Color.ORANGE;
+			case "pink":
+				return Color.PINK;
+			case "purple":
+				return Color.PURPLE;
+			case "red":
+				return Color.RED;
+			case "transparent":
+				return Color.TRANSPARENT;
+			case "violet":
+				return Color.VIOLET;
+			case "white":
+				return Color.WHITE;
+			case "yellow":
+				return Color.YELLOW;
+			default:
+				break;
+			}
+		}
 
 		//	Allow hex colors to start with hash.
 		if (s[0] == '#')
-			s = s[1..7];
+			s = s[1 .. 7];
 
 		// handle 3 and 4-digit color codes
 		char[8] color;
-		if (s.length<=4)
-		{	color[0..2] = s[0];
-			color[2..4] = s[1];
-			color[4..6] = s[2];
-			if (s.length==4)
-				color[6..8] = s[3];
+		if (s.length <= 4)
+		{
+			color[0 .. 2] = s[0];
+			color[2 .. 4] = s[1];
+			color[4 .. 6] = s[2];
+			if (s.length == 4)
+				color[6 .. 8] = s[3];
 			else
-				color[6..8] = 'F';
+				color[6 .. 8] = 'F';
 		}
-		else if (s.length==6)
-		{	color[0..6] = s[0..6];
-			color[6..8] = 'F';
-		} else if (s.length>=8)
-			color[0..8] = s[0..8];
+		else if (s.length == 6)
+		{
+			color[0 .. 6] = s[0 .. 6];
+			color[6 .. 8] = 'F';
+		}
+		else if (s.length >= 8)
+			color[0 .. 8] = s[0 .. 8];
 		//else
 		//	throw new YageException("Could not parse color %s", string);
 
@@ -190,23 +228,24 @@ struct Color
 		Color result;
 		int digit;
 		foreach (int i, char h; color)
-		{	if (i>=8)
+		{
+			if (i >= 8)
 				break;
 
-			digit=0; // will be 0-15
-			if (47 < h && h < 58)	// 0-9
-				digit = (h-48);
+			digit = 0; // will be 0-15
+			if (47 < h && h < 58) // 0-9
+				digit = (h - 48);
 			else if (64 < h && h < 71) // A-F
-				digit = (h-55);
+				digit = (h - 55);
 			else if (96 < h && h < 103) // a-f
-				digit = (h-87);
-		//	else
-		//		throw new YageException("Invalid character '%s' in '%s' for Color()", h, string);
-			result.ub[i/2] += digit * (15*((i+1)%2)+1); // gets low or high nibble
+				digit = (h - 87);
+			//	else
+			//		throw new YageException("Invalid character '%s' in '%s' for Color()", h, string);
+			result.ub[i / 2] += digit * (15 * ((i + 1) % 2) + 1); // gets low or high nibble
 		}
 		return result;
 	}
-/+
+	/+
 	/**
 	 * Assign from a uint, string hexadecimal value, or english color name.
 	 * Strings. can be a 6 or 8 digit hexadecimal or an English color name.
