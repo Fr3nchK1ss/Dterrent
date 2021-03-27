@@ -42,7 +42,9 @@ version(NoReciprocalMul) {
 /// dimension = specifies the dimension of the vector, can be 1, 2, 3 or 4
 /// Examples:
 /// ---
-/// alias vec3i = Vector!(int, 3);
+/// alias Vector!(int, 3) vec3i;
+/// alias Vector!(float, 4) vec4;
+/// alias Vector!(real, 2) vec2r;
 /// ---
 struct Vector(type, int dimension_) {
     static assert(dimension > 0, "0 dimensional vectors don't exist.");
@@ -67,25 +69,25 @@ struct Vector(type, int dimension_) {
         return vector[coord_to_index!coord];
     }
 
-    alias x = get_!'x'; /// static properties to access the values.
-    alias u = x; /// ditto
-    alias s = x; /// ditto
-    alias r = x; /// ditto
+    alias get_!'x' x; /// static properties to access the values.
+    alias x u; /// ditto
+    alias x s; /// ditto
+    alias x r; /// ditto
     static if(dimension >= 2) {
-        alias y = get_!'y'; /// ditto
-        alias v = y; /// ditto
-        alias t = y; /// ditto
-        alias g = y; /// ditto
+        alias get_!'y' y; /// ditto
+        alias y v; /// ditto
+        alias y t; /// ditto
+        alias y g; /// ditto
     }
     static if(dimension >= 3) {
-        alias z = get_!'z'; /// ditto
-        alias b = z; /// ditto
-        alias p = z; /// ditto
+        alias get_!'z' z; /// ditto
+        alias z b; /// ditto
+        alias z p; /// ditto
     }
     static if(dimension >= 4) {
-        alias w = get_!'w'; /// ditto
-        alias a = w; /// ditto
-        alias q = w; /// ditto
+        alias get_!'w' w; /// ditto
+        alias w a; /// ditto
+        alias w q; /// ditto
     }
 
     static if(dimension == 2) {
@@ -1399,11 +1401,11 @@ struct Matrix(type, int rows_, int cols_) if((rows_ > 0) && (cols_ > 0)) {
         /// ditto
         static Matrix translation(Vector!(mt, 3) v) {
             Matrix ret = Matrix.identity;
-
+            
             ret.matrix[0][cols-1] = v.x;
             ret.matrix[1][cols-1] = v.y;
             ret.matrix[2][cols-1] = v.z;
-
+            
             return ret;
         }
 
@@ -2226,42 +2228,35 @@ struct Quaternion(type) {
         assert(almost_equal(q2.z, -1.060660));
         assert(almost_equal(q2.w, 0.7071067f));
     }
-
+    
     /// Returns the quaternion as a vec3 (axis / angle representation).
-    vec3 to_axisAngle() {
+    vec3 to_axis_angle() {
         vec3 ret;
         quat this_normalized = this.normalized();
         real angle = 2 * acos(this_normalized.w);
         real denominator = sqrt(1.0 - (this_normalized.w)^^2);
 
-        if ( denominator < 0.0001) // avoid divide by 0
-        {
+        if (almost_equal(denominator, 0)) { // Avoid divide by 0
             ret.x = 1;
             ret.y = ret.z = 0;
         }
-        else
-        {
+        else {
             ret.x = x / denominator;
             ret.y = y / denominator;
             ret.z = z / denominator;
         }
 
-        //return ret.normalized * angle;
         return ret * angle;
     }
     unittest {
-        // https://www.energid.com/resources/orientation-calculator
+        // See https://www.energid.com/resources/orientation-calculator
 
-        void testPair(quat q, vec3 v)
-        {
-            vec3 q2v = q.to_axisAngle();
-            /*
-             * almost_equal :  epsilon = 0.000001f
-             */
-            assert( almost_equal(q2v.x, q2v.x)
-                    && almost_equal(q2v.y, q2v.y)
-                    && almost_equal(q2v.z, q2v.z),
-                    "to_axisAngle does not yield a correct vector.");
+        void testPair(quat q, vec3 v) {
+            vec3 q2v = q.to_axis_angle();
+            assert(almost_equal(q2v.x, q2v.x) // epsilon = 0.000001f
+                   && almost_equal(q2v.y, q2v.y)
+                   && almost_equal(q2v.z, q2v.z),
+                   "to_axisAngle does not yield a correct vector.");
         }
 
         quat q1 = quat(0.5, 0.5, 0.5, 0.5);
@@ -2432,9 +2427,9 @@ struct Quaternion(type) {
         enum startPitch = 0.1;
         enum startYaw = -0.2;
         enum startRoll = 0.6;
-
+        
         auto q = quat.euler_rotation(startRoll,startPitch,startYaw);
-
+        
         assert(almost_equal(q.pitch,startPitch));
         assert(almost_equal(q.yaw,startYaw));
         assert(almost_equal(q.roll,startRoll));
