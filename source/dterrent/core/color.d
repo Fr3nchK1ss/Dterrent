@@ -8,6 +8,8 @@ module dterrent.core.color;
 
 import std.algorithm.comparison;
 import std.string;
+import std.format;
+import core.bitop;
 import dterrent.core.math;
 
 /+
@@ -20,7 +22,6 @@ import yage.core.types;
 import yage.core.object2;
 
 import std.stdio;
-import std.format;
 +/
 /**
  * A struct used to represent a color.
@@ -245,7 +246,7 @@ struct Color
 		}
 		return result;
 	}
-	/+
+
 	/**
 	 * Assign from a uint, string hexadecimal value, or english color name.
 	 * Strings. can be a 6 or 8 digit hexadecimal or an English color name.
@@ -253,49 +254,59 @@ struct Color
 	 * pink, purple, red, transparent, violet, white, and yellow are supported.
 	 * See: <a href="http://www.w3schools.com/css/css_colornames.asp">CSS color names</a>*/
 	Color opAssign(string string)
-	{	ui = Color(string).ui;
+	{
+		ui = Color(string).ui;
 		return this;
 	}
+
 	Color opAssign(uint value) /// ditto
-	{	ui = value;
+	{
+		ui = value;
 		return this;
 	}
 
 	/// Allow casting color to a uint.
 	uint opCast()
-	{	return ui;
+	{
+		return ui;
 	}
 
 	/// Get the Color as an array of float.
 	float[] f()
-	{	float[4] res;
+	{
+		float[4] res;
 		res[0] = r * frac;
 		res[1] = g * frac;
 		res[2] = b * frac;
 		res[3] = a * frac;
 		return res.dup;
 	}
+
 	void f(float[4] result) /// ditto
-	{	result[0] = r * frac;
+	{
+		result[0] = r * frac;
 		result[1] = g * frac;
 		result[2] = b * frac;
 		result[3] = a * frac;
 	}
 
 	/// Get the Color as a Vector
-	vec3 vec3()
-	{	vec3 res;
-		res.v[0] = r * frac;
-		res.v[1] = g * frac;
-		res.v[2] = b * frac;
+	vec3 toVec3()
+	{
+		vec3 res;
+		res.x = r * frac;
+		res.y = g * frac;
+		res.z = b * frac;
 		return res;
 	}
-	vec4 vec4() /// ditto
-	{	vec4 res;
-		res.v[0] = r * frac;
-		res.v[1] = g * frac;
-		res.v[2] = b * frac;
-		res.v[3] = a * frac;
+
+	vec4 toVec4() /// ditto
+	{
+		vec4 res;
+		res.x = r * frac;
+		res.y = g * frac;
+		res.z = b * frac;
+		res.w = a * frac;
 		return res;
 	}
 
@@ -303,19 +314,21 @@ struct Color
 	 * Get the color as a string.
 	 * Params:
 	 * lower = return lower case hexadecimal digits*/
-	string hex(bool lower=false, char[] lookaside=null)
-	{	if (lower)
+	string hex(bool lower = false, char[] lookaside = null)
+	{
+		if (lower)
 			return format("%.8x", bswap(ui));
 		return format("%.8X", bswap(ui));
 	}
 	/// ditto
 	string toString()
-	{	return "#"~hex();
+	{
+		return "#" ~ hex();
 	}
 
-	import yage.system.log;
 	unittest
-	{	assert(Color.sizeof == 4);
+	{
+		assert(Color.sizeof == 4);
 
 		// Test initializers
 		assert(Color([0, 102, 51, 255]).hex == "006633FF");
@@ -324,8 +337,7 @@ struct Color
 
 		// Test converters
 		assert(Color("abcdef97").hex == "ABCDEF97");
-		assert(Color("006633FF").vec4 == vec4(0.0f, 0.4f, 0.2f, 1.0f));
+		assert(Color("006633FF").toVec4 == vec4(0.0f, 0.4f, 0.2f, 1.0f));
 		assert(Color("006633FF").ui == 0xFF336600);
 	}
-    +/
 }
