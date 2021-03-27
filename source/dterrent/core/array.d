@@ -562,12 +562,12 @@ unittest
 		struct A { int x, y; }
 		A a;
 		ArrayBuilder!(A) array;
-		//array ~= a;
-		//array[0].x = 3;
-		//assert(array[0].x == 3);
+		array ~= a;
+		array[0].x = 3;
+		assert(array[0].x == 3);
 	}
 	{ // Test slice and append; ensure copy on append is performed
-		auto test = ArrayBuilder!(int)([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+		immutable test = ArrayBuilder!(int)([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 		auto original = ArrayBuilder!(int)([0, 1, 2, 3]);
 		auto s = original[1..3];
 		assert(s[0] == original[1]); // compares pointer

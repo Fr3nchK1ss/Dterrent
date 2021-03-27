@@ -79,7 +79,6 @@ class Scene : Node
 	protected static Scene[Scene] all_scenes; // TODO: Prevents old scenes from being removed!
 
 	package float increment = 1 / 60f;
-	;
 
 	/**
 	 * Construct an empty Scene.
@@ -117,7 +116,7 @@ class Scene : Node
 	 * Params:
 	 *     children = recursively clone children (and descendants) and add them as children to the new Node.
 	 * Returns: The cloned Node. */
-	alias Node.clone clone; // for the call to super.clone
+	alias clone = Node.clone; // for the call to super.clone
 	Scene clone(bool children = false, Scene destination = null)
 	{
 		auto result = cast(Scene) super.clone(children, destination);

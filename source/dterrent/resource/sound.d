@@ -207,7 +207,7 @@ class Sound
 	}
 
 	/// Print useful information about the loaded sound file.
-	override string toString()
+	override string toString () const
 	{
 		return format("size of buffer: %l bytes\n size of buffer: %l bytes\n buffers per second: %l bytes\n",
 				buffer_size, buffer_num, buffers_per_sec);
@@ -244,7 +244,7 @@ private abstract class SoundFile
 	}
 
 	/// Print useful information about the loaded sound file.
-	override string toString()
+	override string toString() const
 	{
 		return format("Sound: '%s'\n" ~ "channels: %d\n" ~ "sample rate: %d\n"
 				~ "sample bits: %d\n" ~ "sample length: %d bytes\n" ~ "sample length: %f seconds\n",

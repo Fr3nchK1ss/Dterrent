@@ -205,7 +205,7 @@ class Node : Tree!(Node), IDisposable
 	 * Get / set the rotation of this Node (as an axis-angle vector) relative to its parent's rotation. */
 	vec3 getRotation()
 	{
-		return transform.rotation.to_axisAngle();
+		return transform.rotation.to_axis_angle();
 	}
 
 	quat getRotationQuatrn()
@@ -274,12 +274,12 @@ class Node : Tree!(Node), IDisposable
 
 	unittest
 	{
-		bool hasTransform = true;
+		immutable hasTransform = true;
 		Node n = new Node(hasTransform);
 
 		vec3 av1 = vec3(-.5f, .5f, 1.0f);
 		n.setAngularVelocity(av1);
-		vec3 av2 = n.getAngularVelocity();
+		immutable av2 = n.getAngularVelocity();
 		/* TODO assert(av1.almostEqual(av2), format("%s", av2.v));*/
 	}
 
@@ -452,7 +452,7 @@ class Node : Tree!(Node), IDisposable
 
 	unittest
 	{
-		bool hasTransform = true;
+		immutable hasTransform = true;
 		Node a = new Node(hasTransform);
 		a.setPosition(vec3(3, 0, 0));
 		a.setRotation(vec3(0, 3.1415927, 0));
@@ -486,14 +486,14 @@ class Node : Tree!(Node), IDisposable
 			else
 			{
 				assert(oldTransforms.transforms[transformIndex].node is this);
-				int newIndex = transforms.add(transform(), this);
+				immutable newIndex = transforms.add(transform(), this);
 				oldTransforms.remove(transformIndex);
 				transformIndex = newIndex;
 			}
 			scene = newScene;
 
 			// Update the incrementing values to match the scene increment.
-			float incrementChange = (newScene ? newScene.increment : 1f) / (scene
+			immutable incrementChange = (newScene ? newScene.increment : 1f) / (scene
 					? scene.increment : 1f);
 			transform.velocityDelta *= incrementChange;
 			/* TODO: transform.angularVelocityDelta.multiplyAngle(incrementChange);*/
@@ -529,7 +529,7 @@ class Node : Tree!(Node), IDisposable
 	{
 		tracef("Test Node/Scene creation and addChild()");
 
-		bool hasTransform = true;
+		immutable hasTransform = true;
 		Node a = new Node(hasTransform);
 		Node b = new Node(a);
 		Node c = new Node(a);
@@ -572,7 +572,7 @@ class Node : Tree!(Node), IDisposable
 			return result;
 		}
 
-		int opCmp(Transform rd)
+		int opCmp(Transform rd) const
 		{
 			return 0;
 		}
@@ -599,12 +599,12 @@ class Node : Tree!(Node), IDisposable
 			return cast(int)(transforms.length) - 1;
 		}
 
-		void remove(int index)
+		void remove(uint index)
 		{
 			assert(transforms[index].node.transformIndex == index, format("%d, %d, %s",
 					transforms[index].node.transformIndex, index,
 					transforms[index].node.classinfo.name));
-			if (index != transforms.length - 1)
+			if (index+1 != transforms.length )
 			{
 				transforms[index] = transforms[length - 1]; // move another node no top of the one removed
 				transforms[index].node.transformIndex = index; // update the index of the moved node.
