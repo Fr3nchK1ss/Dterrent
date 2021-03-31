@@ -1,24 +1,14 @@
 /**
- * Copyright:  (c) 2005-2009 Eric Poggel
- * Authors:    Eric Poggel
- * License:    <a href="lgpl3.txt">LGPL v3</a>
- *
- * Array operation functions that are either not part of,
- * or improved from the standard library.
- *
- * Note that they can also be accessed by arrayname.function().
- *
- * Example:
- * --------------------------------
- * // Removing
- * int[] numbers = [0, 1, 2];
- * numbers.remove(0); // numbers is now [0, 1];
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: proprietary / contact dev
+
+	This class is a rewrite of yage3D EngineObject class.
  */
 
 module dterrent.core.array;
+import dterrent.system.logger;
+
 /+
-import tango.core.Traits;
-import tango.math.Math;
 import yage.core.math.math;
 import yage.core.types;
 import yage.core.timer;
@@ -544,7 +534,7 @@ struct ArrayBuilder(T)
 	}
 
 	///
-	string toString()
+	string toString() const
 	{	return ""; // TODO this needs to output the data. swritef(data);
 	}
 
@@ -591,5 +581,66 @@ unittest
 		auto test2 = ArrayBuilder!(int)();
 		test2.splice(0, 0, 1);
 		assert(test2.data == [1]);
+	}
+	{
+		trace("*** ArrayBuilder benchmark ***");
+		import std.datetime.stopwatch: benchmark, Duration;
+		import std.array: appender;
+
+		void concat_withstd()
+		{
+			int[] array;
+			for (int j=0; j<1000; j++)
+				array ~= j;
+		}
+
+		void concat_withArrayBuilder()
+		{
+			ArrayBuilder!(int) array;
+			for (int j=0; j<1000; j++)
+				array ~= j;
+		}
+
+		void concat_withReserve()
+		{
+			int[] array;
+			array.reserve(1000);
+			for (int j=0; j<1000; j++)
+				array ~= j;
+		}
+
+		void concat_withLength()
+		{
+			int[] array;
+			array.length = 1000;
+			for (int j=0; j<1000; j++)
+				array ~= j;
+		}
+
+		void concat_withAppender()
+		{
+			auto array = appender!(int[]);
+			array.reserve(1000);
+			for (int j=0; j<1000; j++)
+				array ~= j;
+		}
+
+		auto r = benchmark!(concat_withstd,
+							concat_withArrayBuilder,
+							concat_withReserve,
+							concat_withLength,
+							concat_withAppender)(10);
+		Duration bench1 = r[0];
+		Duration bench2 = r[1];
+		Duration bench3 = r[2];
+		Duration bench4 = r[3];
+		Duration bench5 = r[4];
+
+		tracef("Concatenation with std: %s", bench1);
+		tracef("Concatenation with Arraybuilder: %s", bench2);
+		tracef("Concatenation with Reserve: %s", bench3);
+		tracef("Concatenation with Length: %s", bench4);
+		tracef("Concatenation with Appender: %s \n", bench5);
+
 	}
 }

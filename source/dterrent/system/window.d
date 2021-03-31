@@ -76,7 +76,7 @@ class Window : IRenderTarget
 		if (SDL_Init(SDL_INIT_VIDEO) < 0)
 			throw new Exception("Unable to initialize SDL: " ~ to!string(SDL_GetError()));
 
-		setResolution(width, height);
+		setResolution(width, height); // @suppress(dscanner.vcall_ctor)
 
 		// Set GL attributes
 		// choose: SDL_GL_CONTEXT_PROFILE_CORE  SDL_GL_CONTEXT_PROFILE_COMPATIBILITY
@@ -108,7 +108,7 @@ class Window : IRenderTarget
 					winWidth, winHeight, SDL_GetError()));
 		SDL_LockSurface(sdlSurface);
 
-		setViewport();
+		setViewport(); // @suppress(dscanner.vcall_ctor)
 
 		int major, minor;
 		SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
