@@ -7,6 +7,8 @@
 module dterrent.core.arraybuilder;
 import dterrent.system.logger;
 
+import std.format;
+
 /**
  * Behaves the same as built-in arrays, except about 6x faster with concatenation at the expense of the base pointer
  * being 4 system words instead of two (16 instead of 8 bytes on a 32-bit system).
@@ -294,7 +296,7 @@ unittest
 		assert(test2.data == [1]);
 	}
 	{
-		trace("*** ArrayBuilder benchmark ***");
+		trace("*** ArrayBuilder Concatenation benchmark ***");
 		import std.datetime.stopwatch : benchmark, Duration;
 		import std.array : appender;
 
@@ -341,18 +343,18 @@ unittest
 			concat_withStdReserve,
 			concat_withStdLength,
 			concat_withAppenderReserve,
-			concat_withArrayBuilder)(1000);
+			concat_withArrayBuilder)(10_000);
 		Duration bench1 = r[0];
 		Duration bench2 = r[1];
 		Duration bench3 = r[2];
 		Duration bench4 = r[3];
 		Duration bench5 = r[4];
 
-		tracef("Concatenation with std: %s", bench1);
-		tracef("Concatenation with Arraybuilder: %s", bench2);
-		tracef("Concatenation with Reserve: %s", bench3);
-		tracef("Concatenation with Length: %s", bench4);
-		tracef("Concatenation with Appender: %s \n", bench5);
+		tracef("with std: %s", bench1);
+		tracef("with stdReserve: %s", bench2);
+		tracef("with stdLength: %s", bench3);
+		tracef("with AppenderReserve: %s", bench4);
+		tracef("with Arraybuilder: %s \n", bench5);
 
 	}
 }

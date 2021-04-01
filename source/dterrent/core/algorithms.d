@@ -8,7 +8,6 @@
 module dterrent.core.algorithms;
 import dterrent.system.logger;
 
-import std.format;
 
 /**
  * Add an element to an already sorted array, maintaining the same sort order.
@@ -262,7 +261,7 @@ void radixSort(T, K)(T[] array, bool increasing, K delegate(T elem) getKey, bool
 		// Only not swap arrays if last pass of an odd size (rare).
 		if (!last_pass || K.sizeof % 2 == 0)
 		{
-			const Elem[] temp = elem_copy;
+			Elem[] temp = elem_copy;
 			elem_copy = elem;
 			elem = temp;
 		}
