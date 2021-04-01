@@ -8,7 +8,7 @@
 module dterrent.core.tree;
 
 import dterrent.core.engineobject;
-import dterrent.core.array;
+import algo = dterrent.core.algorithms;
 
 /**
  * Implements an element that can be used in a tree, with parents and children.
@@ -45,13 +45,13 @@ class Tree(T) : EngineObject
 		if (child.parent)
 		{
 			assert(child.parent.isChild(cast(S) child));
-			dterrent.core.array.remove(child.parent.children, child.index);
+			algo.remove(child.parent.children, child.index);
 		}
 
 		// Add as a child.
 		child.parent = cast(T) this;
 		children ~= cast(T) child;
-		child.index = cast(int)(children.length - 1);
+		child.index = cast(int)(children.length - 1); // @suppress(dscanner.suspicious.length_subtraction)
 
 		return child;
 	}
@@ -70,7 +70,7 @@ class Tree(T) : EngineObject
 
 		if (child.index >= 0)
 		{
-			dterrent.core.array.remove(children, child.index, false);
+			algo.remove(children, child.index, false);
 			if (child.index < children.length) // update index of element that replaced child.
 				children[child.index].index = child.index;
 			child.index = -1; // so remove can't be called twice.

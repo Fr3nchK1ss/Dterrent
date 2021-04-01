@@ -10,6 +10,7 @@ public import dterrent.core.interfaces,
             dterrent.core.math,
             dterrent.core.tree,
             dterrent.core.engineobject,
-            dterrent.core.array,
+            dterrent.core.arraybuilder,
+            dterrent.core.algorithms,
             dterrent.core.color,
             dterrent.core.event;
