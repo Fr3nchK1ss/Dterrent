@@ -2458,6 +2458,15 @@ struct Quaternion(type) {
         this = axis_rotation(alpha, axis) * this;
         return this;
     }
+    unittest
+	{
+        // Vector corresponding to quat(0.1825742, 0.3651484, 0.5477226, 0.7302967);
+		vec3 v = vec3(1.030380653, 1.54557098, 2.060761024);
+		quat q = quat.axis_rotation(v.magnitude, v.normalized);
+		//tracef("quaternion from axis/angle: %s", q);
+		assert(almost_equal(q.w, 0.1825742), "rotate_axis: quaternion magnitude not correct!");
+        assert(almost_equal(q.x, 0.3651484), "rotate_axis: quaternion x value not correct!");
+	}
 
     /// Applies an euler rotation to the current quaternion and returns $(I this).
     Quaternion rotate_euler(real heading, real attitude, real bank) {

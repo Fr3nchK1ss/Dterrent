@@ -14,12 +14,6 @@ import dterrent.system.sound;
 import dterrent.system.window;
 
 /+
-import tango.core.Memory;
-
-import derelict.opengl3.gl;
-import derelict.opengl3.ext;
-import derelict.util.exception;
-
 import yage.gui.surface;
 import yage.system.graphics.all;
 import yage.scene.scene;

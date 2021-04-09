@@ -1,5 +1,5 @@
 /**
-	Authors: Fr3nchK1ss on github
+	Authors: Poggel / Fr3nchK1ss on github
 	Copyright: proprietary / contact dev
 
  */

@@ -22,6 +22,10 @@
 
     "buildRequirements" : [
         "disallowDeprecations"
-    ]
+    ],
+
+	"buildOptions": [
+		"optimize"
+	]
 
 }

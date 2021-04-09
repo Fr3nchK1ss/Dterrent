@@ -1,5 +1,5 @@
 /**
-	Authors: Fr3nchK1ss on github
+	Authors: Poggel / Fr3nchK1ss on github
 	Copyright: proprietary / contact dev
 
  */
@@ -12,17 +12,7 @@ import std.format;
 import core.bitop;
 import dterrent.core.math;
 
-/+
-import tango.io.Stdout;
-import tango.core.BitManip;
-import tango.math.Math;
-import tango.text.Ascii;
 
-import yage.core.types;
-import yage.core.object2;
-
-import std.stdio;
-+/
 /**
  * A struct used to represent a color.
  * Colors are represented in RGBA format.

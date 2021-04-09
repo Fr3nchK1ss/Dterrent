@@ -216,7 +216,11 @@ class Node : Tree!(Node), IDisposable
 	void setRotation(vec3 axisAngle) /// ditto
 	{
 		setWorldDirty();
-		//transform.rotation = axisAngle.toQuatrn();
+
+		transform.rotation.rotate_axis(
+			axisAngle.magnitude,
+			axisAngle.normalized
+		);
 	}
 
 	void setRotation(quat quaternion) /// ditto

@@ -17,17 +17,6 @@ import dterrent.core.interfaces;
 import dterrent.core.math;
 import libloader = dterrent.system.libloader;
 
-/*
-import derelict.util.exception;
-import derelict.sdl2.types;
-import yage.gui.surface;
-
-import yage.resource.image;
-import yage.scene.scene;
-
-import yage.system.graphics.all;
-import yage.system.system;
-*/
 
 // TODO: remove those var
 const int LIGHT_MODEL_COLOR_CONTROL_EXT = 0x81F8;
