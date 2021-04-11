@@ -6,6 +6,7 @@
  */
 
 module dterrent.scene.scene;
+import dterrent.system.logger;
 
 import core.sync.mutex;
 import dterrent.scene.node;
@@ -16,7 +17,6 @@ import tango.core.Thread;
 import tango.time.Clock;
 import yage.system.system;
 import yage.system.sound.soundsystem;
-import yage.system.log;
 import yage.scene.camera;
 import yage.scene.light;
 import yage.scene.sound;
@@ -48,7 +48,7 @@ import yage.scene.visible;
  * scene.setSkybox(skybox);
  * --------------------------------
  */
-class Scene : Node
+class Scene : Node, IDisposable
 {
 
 	// TODO: move these to a struct
@@ -62,7 +62,7 @@ class Scene : Node
 	/// where objects become completely obscured by the fog. */
 	float speedOfSound = 343f; /// Speed of sound in units/second
 
-	package ContiguousTransforms nodeTransforms;
+	Node.ContiguousTransforms nodeTransforms;
 
 	/+
 	protected CameraNode[CameraNode] cameras;
@@ -131,7 +131,9 @@ class Scene : Node
 	}
 
 	/**
-	 * Overridden to pause the scene update and sound threads and to remove this instance from the array of all scenes. */
+	 * Overridden to pause the scene update and sound threads and to remove this instance
+	 * from the array of all scenes.
+	*/
 	override void dispose()
 	{
 		if (this in all_scenes) // repeater will be null if dispose has already been called.

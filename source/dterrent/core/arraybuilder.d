@@ -295,6 +295,7 @@ unittest
 		test2.splice(0, 0, 1);
 		assert(test2.data == [1]);
 	}
+/*
 	{
 		trace("*** ArrayBuilder Concatenation benchmark ***");
 		import std.datetime.stopwatch : benchmark, Duration;
@@ -355,6 +356,5 @@ unittest
 		tracef("with stdLength: %s", bench3);
 		tracef("with AppenderReserve: %s", bench4);
 		tracef("with Arraybuilder: %s \n", bench5);
-
-	}
+	}*/
 }

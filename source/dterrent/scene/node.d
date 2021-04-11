@@ -10,17 +10,7 @@ import dterrent.system.logger;
 import std.format;
 import dterrent.core;
 import dterrent.scene.scene;
-
-/+
-import tango.core.Thread;
-import tango.math.Math;
-import yage.core.all;
-import yage.core.tree;
-import yage.scene.scene;
-import yage.scene.all;
-import yage.system.log;
-import std.range;
-+/
+import std.math: cos, acos;
 
 /**
  * Nodes are used for building scene graphs in Yage.
@@ -261,7 +251,8 @@ class Node : Tree!(Node), IDisposable
 	}
 
 	/**
-	 * Get / set the angular (rotation) velocity this Node relative to its parent's velocity. */
+	 * Get / set the angular (rotation) velocity this Node relative to its parent's velocity.
+	 */
 	vec3 getAngularVelocity()
 	{
 		return transform.angularVelocity;
@@ -270,10 +261,14 @@ class Node : Tree!(Node), IDisposable
 	void setAngularVelocity(vec3 axisAngle) /// ditto
 	{
 		transform.angularVelocity = axisAngle;
-		/* TODO if (scene)
-			transform.angularVelocityDelta = (axisAngle*scene.increment).toQuatrn();
-		else
-			transform.angularVelocityDelta = axisAngle.toQuatrn();*/
+
+		if (scene)
+			axisAngle *= scene.increment;
+
+		transform.angularVelocityDelta = quat.axis_rotation(
+			axisAngle.magnitude,
+			axisAngle.normalized
+		);
 	}
 
 	unittest
@@ -284,24 +279,27 @@ class Node : Tree!(Node), IDisposable
 		vec3 av1 = vec3(-.5f, .5f, 1.0f);
 		n.setAngularVelocity(av1);
 		immutable av2 = n.getAngularVelocity();
-		/* TODO assert(av1.almostEqual(av2), format("%s", av2.v));*/
+		import gl3n.math: almost_equal;
+		assert(almost_equal(av1.x, av2.x)
+			&& almost_equal(av1.y, av2.y)
+			&& almost_equal(av1.z, av2.z));
 	}
 
 	/**
 	 * Get the position, axis-angle rotation, or scale in world coordinates,
-	 * instead of relative to the parent Node. */
+	 * instead of relative to the parent Node.
+	 */
 	vec3 getWorldPosition()
 	{
 		if (transform.worldDirty) // makes it faster.
 			calcWorld();
-		return transform.worldPosition; // TODO: optimize
+		return transform.worldPosition;
 	}
 
 	vec3 getWorldRotation() /// ditto
 	{
 		calcWorld();
-		/* TODO return transform.worldRotation.toAxis();*/
-		return vec3(0);
+		return transform.worldRotation.to_axis_angle();
 	}
 
 	quat getWorldRotationQuatrn() /// ditto
@@ -315,33 +313,64 @@ class Node : Tree!(Node), IDisposable
 		calcWorld();
 		return transform.worldScale;
 	}
-	/+
+
 	/// Bug:  Doesn't take parent's rotation or scale into account
 	vec3 getWorldVelocity()
 	{
 		calcWorld();
-		if (parent)
-		{	if (scene)
-				return transform.velocityDelta/scene.increment + parent.getWorldVelocity();
-			return transform.velocityDelta + parent.getWorldVelocity();
-		}
+
+		vec3 worldVelocity = transform.velocityDelta;
 		if (scene)
-			return transform.velocityDelta/scene.increment;
-		return transform.velocityDelta;
+			worldVelocity /= scene.increment;
+		if (parent)
+			worldVelocity += parent.getWorldVelocity();
+
+		return worldVelocity;
 	}
 
-	// Convenience functions:
 
+	// Convenience functions
+	mat4 getTransform()
+	{	
+		mat4 ret = mat4.identity;
+		ret.translate(transform.position);
+		ret.set_rotation( transform.rotation.to_matrix!(3,3) );
+		//TODO ret.set_scale(matrix)
 
-	Matrix getTransform()
-	{	return Matrix.compose(transform.position, transform.rotation, transform.scale);
+		return ret;
 	}
-
-	///
-	Matrix getWorldTransform()
+	mat4 getWorldTransform()
 	{
 		calcWorld();
-		return Matrix.compose(transform.worldPosition, transform.worldRotation, transform.worldScale);
+		mat4 ret = mat4.identity;
+		ret.translate(transform.worldPosition);
+		ret.set_rotation( transform.worldRotation.to_matrix!(3,3) );
+		//TODO ret.set_scale(worldScale matrix)
+
+		return ret;
+	}
+	unittest
+	{
+		tracef("Test getTransform");
+		immutable hasTransform = true;
+		Node a = new Node(hasTransform);
+		a.setPosition(vec3(3, 2, 0.5));
+		a.setRotation(vec3(0, 3.1415927, 0));
+		mat4 transfo_matrix = a.getTransform();
+
+		// Smooth the result
+		import gl3n.math: almost_equal;
+		foreach( ref float[4] row; transfo_matrix.matrix )
+			foreach( ref e; row)
+				if ( almost_equal(e, 0) )
+					e = 0;
+
+		//tracef("Transform matrix: %s", transfo_matrix);
+		assert( transfo_matrix == [[-1.0f, 0.0f, 0.0f,  3.0f],
+                     			   [0.0f,  1.0f, 0.0f,  2.0f],
+                     			   [0.0f,  0.0f, -1.0f, 0.5f],
+                     			   [0.0f,  0.0f, 0.0f,  1.0f]]);
+								
 	}
 
 	///
@@ -351,17 +380,16 @@ class Node : Tree!(Node), IDisposable
 		setWorldDirty();
 	}
 
-	///
+	/// 
 	void rotate(vec3 axisAngle)
 	{
-		transform.rotation = transform.rotation*axisAngle.toQuatrn();
-		setWorldDirty();
+		setRotation(axisAngle);
 	}
 
 	///
 	void rotate(quat quaternion)
 	{
-		transform.rotation = transform.rotation*quaternion;
+		transform.rotation *= quaternion;
 		setWorldDirty();
 	}
 
@@ -374,20 +402,33 @@ class Node : Tree!(Node), IDisposable
 			transform.velocityDelta += amount;
 	}
 
-	///
+	/**
+	 * Increase the angular acceleration factor (== angular velocity) by
+	 * combining the old velocity with a new axisAngle.
+	 */
 	void angularAccelerate(vec3 axisAngle)
-	{	// // already present in called function
-		setAngularVelocity(transform.angularVelocity.combineRotation(axisAngle)); // TODO: Is this clamped to -PI to PI?
+	{	
+		// Need to combine the 2 axis/angle == quaternion multiplication in reverse order
+		immutable quat qAA = quat.axis_rotation(axisAngle.magnitude, axisAngle.normalized);
+		immutable vec3 newAngularVelocity = (qAA * transform.angularVelocityDelta).to_axis_angle();
+
+		setAngularVelocity(newAngularVelocity);
 	}
 	unittest
-	{	Node n = new Node();
-		vec3 av = vec3(-.5, .5, 1);
-		n.setAngularVelocity(av);
-		n.angularAccelerate(av);
-		vec3 av2 = n.getAngularVelocity();
-		assert(av2.almostEqual(av*2), format("%s", av2.v));
+	{
+		Node n = new Node(true);//hasTransform
+		vec3 av1 = vec3(-.5, .5, 1);
+		n.setAngularVelocity(av1);
+		n.angularAccelerate(av1);
+		immutable vec3 av2 = n.getAngularVelocity();
+
+		av1 *= 2;
+		import gl3n.math: almost_equal;
+		assert(almost_equal(av1.x, av2.x)
+			&& almost_equal(av1.y, av2.y)
+			&& almost_equal(av1.z, av2.z));
 	}
-+/
+
 	/// Get the Scene at the top of the tree that this node belongs to, or null if this is part of a scene-less node tree.
 	Scene getScene()
 	{
@@ -410,7 +451,8 @@ class Node : Tree!(Node), IDisposable
 	/*
 	 * Set the worldDirty flag on this Node and all of its children, if they're not dirty already.
 	 * This should be called whenever a Node has its transformation matrix changed.
-	 * This function is used internally by the engine usually doesn't need to be called manually. */
+	 * This function is used internally by the engine usually doesn't need to be called manually.
+	 */
 	package void setWorldDirty()
 	{
 		if (!transform.worldDirty)
@@ -421,8 +463,9 @@ class Node : Tree!(Node), IDisposable
 		}
 	}
 
-	/*
-	 * Calculate the value of the worldPosition, worldRotation, and worldScale. */
+	/**
+	 * Calculate the value of the worldPosition, worldRotation, and worldScale.
+	 */
 	protected void calcWorld()
 	{
 		if (transform.worldDirty)
@@ -431,17 +474,38 @@ class Node : Tree!(Node), IDisposable
 			{
 				parent.calcWorld();
 
+				/* scaling */
+				// TODO: change worldScale below to a simple real scalar? 
+				// The line below is commented out, there is not vec3*vec3 multiplication with gl3n
+				// worldScale is a vec3(1) anyway, and no scaling occurs through demos or anywhere...
 				//transform.worldPosition = transform.position * parent.transform.worldScale;
-				if (parent.transform.worldRotation != quat(vec4(1))) // Because rotation is more expensive
+				transform.worldPosition = transform.position;
+
+				/* rotation */
+				if (parent.transform.worldRotation != quat.identity) // if parent has rotation
 				{
-					/* TODO transform.worldPosition = transform.worldPosition.rotate(parent.transform.worldRotation);*/
+					/* Apply parent rotation to node position */
+					quat qWorldPos = quat(0, transform.worldPosition); // vec3 to pure quat
+					qWorldPos = parent.transform.worldRotation // TODO: suboptimal
+								* qWorldPos
+								* parent.transform.worldRotation.conjugated;
+					// Round results close to 0
+					import gl3n.math: almost_equal;
+					if ( almost_equal(qWorldPos.x, 0) ) qWorldPos.x = 0;
+					if ( almost_equal(qWorldPos.y, 0) ) qWorldPos.y = 0;
+					if ( almost_equal(qWorldPos.z, 0) ) qWorldPos.z = 0;
+					transform.worldPosition = vec3(qWorldPos.x, qWorldPos.y, qWorldPos.z);
+					
+					/* Apply parent rotation to node rotation */
 					transform.worldRotation = parent.transform.worldRotation * transform.rotation;
 				}
 				else
 					transform.worldRotation = transform.rotation;
 
-				transform.worldPosition += parent.transform.worldPosition;
-				/* TODO transform.worldScale =  parent.transform.worldScale * transform.scale;*/
+				/* translation */
+				transform.worldPosition = transform.worldPosition + parent.transform.worldPosition;
+				// Same comment as above, consider changing transform.scale to scalar
+				// transform.worldScale =  parent.transform.worldScale * transform.scale;
 
 			}
 			else
@@ -456,19 +520,24 @@ class Node : Tree!(Node), IDisposable
 
 	unittest
 	{
+		tracef("Test calcWorld");
+
 		immutable hasTransform = true;
 		Node a = new Node(hasTransform);
 		a.setPosition(vec3(3, 0, 0));
 		a.setRotation(vec3(0, 3.1415927, 0));
 
-		Node b = new Node(a);
+		Node b = new Node(a); // child node
 		b.setPosition(vec3(5, 0, 0));
-		auto bw = b.getWorldPosition();
-		/* TODO assert(bw.almostEqual(vec3(-2, 0, 0)), format("%s", bw.v));*/
+		immutable bw = b.getWorldPosition();
+		
+		//tracef("bw = %s", bw);
+		assert(bw == vec3(-2,0,0));
 
-		a.setScale(vec3(2, 2, 2));
-		bw = b.getWorldPosition();
-		/* TODO assert(bw.almostEqual(vec3(-7, 0, 0)), format("%s", bw.v));*/
+		/* TODO: scale as scalar. See calcWorld */
+		//a.setScale(vec3(2, 2, 2));
+		//bw = b.getWorldPosition();
+		//assert(bw.almostEqual(vec3(-7, 0, 0)), format("%s", bw.v));
 	}
 
 	/*
@@ -479,9 +548,9 @@ class Node : Tree!(Node), IDisposable
 	 *    oldAncestor = The ancestor that was previously one above the top node of the tree that had its parent changed. */
 	protected void ancestorChange(Node oldAncestor)
 	{
-		Scene newScene = parent ? parent.scene : null;
-		auto transforms = newScene ? &newScene.nodeTransforms : &orphanTransforms;
-		auto oldTransforms = scene ? &scene.nodeTransforms : &orphanTransforms;
+		Scene newScene = (parent !is null) ? parent.scene : null;
+		auto transforms = (newScene !is null) ? &newScene.nodeTransforms : &orphanTransforms;
+		auto oldTransforms = (scene !is null) ? &scene.nodeTransforms : &orphanTransforms;
 
 		if (transforms !is oldTransforms) // changing scene of existing node
 		{
@@ -500,11 +569,15 @@ class Node : Tree!(Node), IDisposable
 			immutable incrementChange = (newScene ? newScene.increment : 1f) / (scene
 					? scene.increment : 1f);
 			transform.velocityDelta *= incrementChange;
-			/* TODO: transform.angularVelocityDelta.multiplyAngle(incrementChange);*/
+			// velocityDelta as quaternion
+			immutable real newMagnitude = cos( acos(transform.angularVelocityDelta.magnitude)*incrementChange );
+			transform.angularVelocityDelta.w = newMagnitude;
 		}
-		/* TODO: verify else if !!! Does not seem to cover all cases !!!*/
-		else if (transformIndex == -1) // a brand new node
-			transformIndex = transforms.addNew(this);
+		else
+		{
+			if (transformIndex == -1) // a brand new node
+				transformIndex = transforms.addNew(this);
+		}
 
 		assert(transforms.transforms[transformIndex].node is this);
 
@@ -517,13 +590,9 @@ class Node : Tree!(Node), IDisposable
 		debug
 		{
 			if (scene)
-			{
 				assert(0 <= transformIndex && transformIndex < transforms.length);
-			}
 			else
-			{
 				assert(transformIndex != -1);
-			}
 		}
 		assert(transform); // assert it is accessible
 		assert(transform.worldDirty || !transform.worldDirty);
@@ -552,7 +621,7 @@ class Node : Tree!(Node), IDisposable
 	struct Transform
 	{
 		vec3 position;
-		quat rotation;
+		quat rotation = quat.identity;
 		vec3 scale = vec3(1);
 
 		vec3 velocityDelta; // Velocity times the scene increment, for faster updating.
@@ -587,7 +656,7 @@ class Node : Tree!(Node), IDisposable
 	 * This is more cache friendly and testing shows this greatly increases performance. */
 	struct ContiguousTransforms
 	{
-		Node.Transform[] transforms; // TODO: Make ArrayBuilder or equivalent after migrating to D2.
+		Node.Transform[] transforms;
 
 		int add(Node.Transform* transform, Node n)
 		{
