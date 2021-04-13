@@ -1,8 +1,10 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+    Rewrite of yage3d module OpenAL
 
+	Authors: Fr3nchK1ss
+	Copyright: public domain
  */
+
 
 module dterrent.system.sound.openal;
 import dterrent.system.logger;
@@ -13,6 +15,9 @@ public import bindbc.openal;
 
 package(dterrent.system.sound) ALCdevice* device = null;
 
+/**
+ * Implement a dedicated exception
+ */
 class OpenALException : Exception
 {
     this(string msg)
@@ -22,7 +27,9 @@ class OpenALException : Exception
 }
 
 /**
- * Class to bundle OpenAL
+   struct to bundle OpenAL
+
+ * TODO: the struct frame is kept for historical reasons, functions should be module functions (not struct static)
  */
 struct OpenAL
 {

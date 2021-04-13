@@ -13,7 +13,6 @@ import bindbc.sdl;
 
 void main()
 {
-    bool dragging;
     bool running = true;
     enum FPS = 90; // Target FPS
 

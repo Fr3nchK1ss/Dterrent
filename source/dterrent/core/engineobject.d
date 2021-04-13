@@ -1,14 +1,14 @@
 /**
-	Authors: Poggel / Fr3nchK1ss
-	Copyright: proprietary / contact dev
+	This module is a rewrite of yage3D EngineObject class.
 
-	This class is a rewrite of yage3D EngineObject class.
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
 
 module dterrent.core.engineobject;
 
 /**
- * Base class of some Dterrent objects.
+ The EngineObject class is a base class for dterrent objects using Ids.
  */
 class EngineObject
 {

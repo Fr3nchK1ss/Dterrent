@@ -1,7 +1,9 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+    Nodes are used for building scene graphs.
 
+	Used together with the tree module (CRTP)
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
 
 module dterrent.scene.node;
@@ -13,7 +15,8 @@ import dterrent.scene.scene;
 import std.math: cos, acos;
 
 /**
- * Nodes are used for building scene graphs in Yage.
+ * Defines an abstract engine node, belonging to a tree
+ *
  * Every node has an array of child nodes as well as a parent node, with
  * the exception of a Scene that exists at the top of the scene graph and has no parent.
  * When one node is moved or rotated, all of its child nodes move and rotate as well.
@@ -123,7 +126,9 @@ class Node : Tree!(Node), IDisposable
 	 * Make a duplicate of this node, unattached to any parent Node.
 	 * Params:
 	 *     cloneChildren = recursively clone children (and descendants) and add them as children to the new Node.
-	 * Returns: The cloned Node. */
+	 	   destination = the node defined to receive the clone, if any
+	 * Returns: The cloned Node.
+	 */
 	Node clone(bool cloneChildren = true, Node destination = null) /// ditto
 	{
 

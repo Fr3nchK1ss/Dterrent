@@ -1,9 +1,10 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+    Rewrite of Yage3d Scene module
 
-	This class is a rewrite of yage3D Tree class.
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
+
 
 module dterrent.scene.scene;
 import dterrent.system.logger;
@@ -11,6 +12,8 @@ import dterrent.system.logger;
 import core.sync.mutex;
 import dterrent.scene.node;
 import dterrent.core;
+import dterrent.scene.lightnode;
+import dterrent.scene.cameranode;
 
 /+
 import tango.core.Thread;
@@ -25,6 +28,7 @@ import yage.scene.visible;
 
 /**
  * A Scene is the root of a tree of Nodes, and threfore never has a parent.
+ *
  * Certain "global" variables are stored per Scene and affect all Nodes in that Scene.
  * Examples include global ambient lighting and the speed of sound.
  * Scenes also maintain an array of all LightNodes in them.
@@ -64,9 +68,9 @@ class Scene : Node, IDisposable
 
 	Node.ContiguousTransforms nodeTransforms;
 
-	/+
-	protected CameraNode[CameraNode] cameras;
 	protected LightNode[LightNode] lights;
+	protected CameraNode[CameraNode] cameras;
+/+
 	protected SoundNode[SoundNode] sounds;
 +/
 	protected Mutex mutex;
@@ -110,13 +114,14 @@ class Scene : Node, IDisposable
 		dispose();
 	}
 
+	alias clone = Node.clone; // for the call to super.clone
 	/**
 	 * Make a duplicate of this scene.
 	 * The duplicate will always start with its update thread paused.
 	 * Params:
 	 *     children = recursively clone children (and descendants) and add them as children to the new Node.
+	 	   destination = the scene defined to receive the clone, if any
 	 * Returns: The cloned Node. */
-	alias clone = Node.clone; // for the call to super.clone
 	Scene clone(bool children = false, Scene destination = null)
 	{
 		auto result = cast(Scene) super.clone(children, destination);
@@ -140,7 +145,7 @@ class Scene : Node, IDisposable
 		{
 			super.dispose();
 			//cameras = null;
-			//lights = null;
+			lights = null;
 			//sounds = null;
 			all_scenes.remove(this);
 		}
@@ -236,7 +241,7 @@ class Scene : Node, IDisposable
 		camerasMutex.unlock();
 		updateTime = a.tell();
 	}
-
++/
 	/*
 	 * Add/remove the light from the scene's list of lights.
 	 * This function is used internally by the engine and doesn't normally need to be called.*/
@@ -248,7 +253,6 @@ class Scene : Node, IDisposable
 	{
 		lights.remove(light);
 	}
-
 	/**
 	 * Get all LightNodes that are currently a part of this scene. */
 	LightNode[LightNode] getAllLights()
@@ -267,7 +271,7 @@ class Scene : Node, IDisposable
 	{
 		cameras.remove(camera);
 	}
-
+/+
 	/**
 	 * Get all CameraNodes that are currently a part of this scene.
 	 * Returns: a self indexed array. */

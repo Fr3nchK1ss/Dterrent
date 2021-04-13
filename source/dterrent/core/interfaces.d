@@ -1,7 +1,8 @@
 /**
-	Authors: Poggel / Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+	This module defines dlang interfaces used in the engine
 
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
 
 module dterrent.core.interfaces;

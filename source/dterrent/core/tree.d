@@ -1,8 +1,8 @@
 /**
-	Authors: Poggel / Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+	This module is a rewrite of yage3D Tree class.
 
-	This class is a rewrite of yage3D Tree class.
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
 
 module dterrent.core.tree;

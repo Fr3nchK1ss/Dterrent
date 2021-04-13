@@ -1,8 +1,10 @@
 /**
-	Authors: Poggel / Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+    This module manages OpenAL device and sources
 
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
+
 
 module dterrent.system.sound.soundsystem;
 import dterrent.system.logger;
@@ -175,6 +177,7 @@ class SoundContext
 
 /*
  * Represents an OpenAL source (an instance of a sound playing).
+
  * Typical hardware can only support a small number of these, so SoundNodes map and unmap to these sources as needed.
  * This is used internally by the engine and should never need to be instantiated manually. */
 private class SoundSource : IDisposable

@@ -1,7 +1,8 @@
 /**
-	Authors: Poggel / Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
 
+	TODO: Replace by a Color dub package
  */
 
 module dterrent.core.color;
@@ -15,11 +16,11 @@ import dterrent.core.math;
 
 /**
  * A struct used to represent a color.
+ *
  * Colors are represented in RGBA format.
  * Note that uints and dwords store the bytes in reverse (little endian),
  * so Color(0x6633ff00).hex == "00FF3366"
  * All Colors default to transparent black.
- * TODO: Convert to using four floats for better arithmetic, or just make it templated?
  *
  * Example:
  * --------------------------------
@@ -28,6 +29,7 @@ import dterrent.core.math;
  * writefln(Color("blue")); 	 // outputs "0000FF00"
  * writefln(Color(0x00FF0000));  // outputs "0000FF00"
  * --------------------------------
+ *
  */
 struct Color
 {
@@ -119,14 +121,14 @@ struct Color
 			res.a = 255;
 		return res;
 	}
-	/+
+
 	static Color opCall(vec3 v) /// ditto
-	{	return Color(v.v);
+	{	return Color(v.x, v.y, v.z);
 	}
 	static Color opCall(vec4 v) /// ditto
-	{	return Color(v.v);
+	{	return Color(v.x, v.y, v.z, v.w);
 	}
-    +/
+
 
 	/**
 	 * Initialize from a uint, string hexadecimal value, or english color name.

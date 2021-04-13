@@ -1,20 +1,24 @@
 /**
-	Authors: Eric Poggel, Fr3nchK1ss
-	Copyright: proprietary / contact dev
+	This module is a rewrite of yage3D Event class.
 
-	This class is a rewrite of yage3D Event class.
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
 
 module dterrent.core.event;
 
 /**
  * Implements the event pattern.
+ 
  * Params:
  *     T = Every listener of this event should accept these arguments
  * Example:
+ * ---
  * Event!(int) event;
  * event.addListener(delegate void(int a) { ... });
- * event(); // calls all listeners. */
+ * event(); // calls all listeners.
+ * ---
+ */
 struct Event(T...)
 {
 	void delegate() listenersChanged; /// Called after the listeners are added or removed.
@@ -24,6 +28,7 @@ struct Event(T...)
      */
 	protected bool[void delegate(T)] listeners;
 
+	///
 	void addListener(void delegate(T) listener)
 	{
 		listeners[listener] = true;
@@ -37,12 +42,13 @@ struct Event(T...)
 		foreach (func, unused; listeners)
 			func(args);
 	}
-
+	///
 	ulong length()
 	{
 		return listeners.length;
 	}
 
+	///
 	void removeListener(void delegate(T) listener)
 	{
 		listeners.remove(listener);
@@ -50,6 +56,7 @@ struct Event(T...)
 			listenersChanged();
 	}
 
+	///
 	void removeAll()
 	{
 		foreach (key; listeners.keys)

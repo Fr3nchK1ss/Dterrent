@@ -1,6 +1,6 @@
 /**
 	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+	Copyright: public domain
 
  */
 

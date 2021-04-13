@@ -1,8 +1,8 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+    Rewrite of yage3d Window class
 
-	This class is a rewrite of yage3D Window class.
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
 
 module dterrent.system.window;
@@ -18,17 +18,21 @@ import dterrent.core.math;
 import libloader = dterrent.system.libloader;
 
 
-// TODO: remove those var
+/* deprecated
 const int LIGHT_MODEL_COLOR_CONTROL_EXT = 0x81F8;
 const int SINGLE_COLOR_EXT = 0x81F9;
 const int SEPARATE_SPECULAR_COLOR_EXT = 0x81FA;
+*/
 
 /**
- * Example
- * System.init(); // required
- * auto window = Window.getInstance();
- * window.setResolution(640, 480); // window is created/recreated here
- * --------
+ * Example:
+ * ---
+	void main()
+	{
+		dterrent.system.init();
+		auto window = Window.getInstance();
+	}
+ * ---
  */
 class Window : IRenderTarget
 {
@@ -137,8 +141,8 @@ class Window : IRenderTarget
 	{
 		return winWidth;
 	}
-
-	override ulong getHeight() /// ditto
+	/// ditto
+	override ulong getHeight()
 	{
 		return winHeight;
 	}
@@ -183,7 +187,7 @@ class Window : IRenderTarget
 	 *     w = width of the window in pixels
 	 *     h = height of the window in pixels
 	 *     depth = Color depth of each pixel.  Should be 16, 24, 32, or 0 for auto.
-	 *     fullscreen = The window is fullscreen if true; windowed otherwise.
+	 *     fullscreen_ = The window is fullscreen if true; windowed otherwise.
 	 *     samples = The number of samples to use for anti-aliasing (1 for no aa).
 	 */
 	void setResolution(ulong w, ulong h, ubyte depth = 0, bool fullscreen_ = false, ubyte samples = 1)
@@ -232,9 +236,11 @@ class Window : IRenderTarget
 
 	/**
 	 * Set the viewport position and size
+
 	 * Params:
 	 *     topLeft = Top left coordinates of the viewport in pixels.
-	 *     winWidthwinHeight = winWidth and winHeight of the viewport in pixels.  If zero, defaults to window winWidth/winHeight. */
+	 *     wh = winWidth and winHeight of the viewport in pixels.  If zero, defaults to window winWidth/winHeight.
+	 */
 	void setViewport(vec2i topLeft = vec2i(0), vec2i wh = vec2i(0))
 	{
 		if (wh.x <= 0)

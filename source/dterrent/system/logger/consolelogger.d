@@ -1,8 +1,10 @@
 /**
+ A module to log traces in a terminal
+ 
  Authors: Luis on forum.dlang
  https://forum.dlang.org/post/wsjiepwnrwtjltazhedg@forum.dlang.org
 
- I tried to use the "colored-logger" package, but it has some range exceptions
+ TODO: I tried to use the "colored-logger" package, but it has some range exceptions
  as of 10/2020
 */
 

@@ -1,8 +1,10 @@
 /**
-	Authors: Poggel / Fr3nchK1ss
-	Copyright: proprietary / contact dev
+	This module contains specific algorithms used by Dterrent
 
-	This class is a rewrite of yage3D EngineObject class.
+	Authors: Poggel
+	Copyright: Contact Fr3nchK1ss
+
+	TODO: use radixSort from a dub package / remove replaceSmallestIfBigger
  */
 
 module dterrent.core.algorithms;
@@ -11,14 +13,17 @@ import dterrent.system.logger;
 
 /**
  * Add an element to an already sorted array, maintaining the same sort order.
- * replace this with a Heap?
+ * 
  * Params:
  *     array = The array to use.
  *     value = Value to add.
  *     increasing = The elements are stored in increasing order.
  *     getKey = A function to return a key of type K for each element.
  *     			K must be either a primitive type or a type that impelments opCmp.
- *              Only required for arrays of classes and structs. */
+ *              Only required for arrays of classes and structs.
+	   max_length = define a maximum length for the input array growth
+ * TODO: dichotomy search of key_value position / input array as BST
+ */
 void addSorted(T, K)(ref T[] array, T value, bool increasing,
 		K delegate(T elem) getKey, int max_length = int.max)
 {
@@ -35,7 +40,7 @@ void addSorted(T, K)(ref T[] array, T value, bool increasing,
 		return;
 
 	// Despite two loops, this still runs in worst-case O(n)
-	for (int i = 0; i < array.length - 1; i++) // TODO: Use a binary search instead of linear.
+	for (int i = 0; i < array.length - 1; i++)
 	{
 		if (increasing ? key_value <= getKey(array[i]) : key_value >= getKey(array[i]))
 		{
@@ -48,9 +53,9 @@ void addSorted(T, K)(ref T[] array, T value, bool increasing,
 
 	array[$ - 1] = value;
 }
-
+/// ditto
 void addSorted(T, K)(ref ArrayBuilder!(T) array, T value, bool increasing,
-		K delegate(T elem) getKey, int max_length = int.max) /// ditto
+		K delegate(T elem) getKey, int max_length = int.max)
 		{
 	if (!array.length)
 	{
@@ -94,6 +99,7 @@ bool replaceSmallestIfBigger(T)(T[] array, T item, bool delegate(T a, T b) isABi
 }
 
 /+
+  Replaced by std.isSorted
 /// Ditto
 bool sorted(T, K)(T[] array, bool increasing, K delegate(T elem) getKey)
 {

@@ -1,18 +1,18 @@
 /**
-	Authors: Poggel / Fr3nchK1ss
-	Copyright: proprietary / contact dev
+	This module implements an array with fast concatenation. See benchmark.
 
-	This class is a rewrite of yage3D EngineObject class.
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
+
 module dterrent.core.arraybuilder;
 import dterrent.system.logger;
 
 import std.format;
 
 /**
- * Behaves the same as built-in arrays, except about 6x faster with concatenation at the expense of the base pointer
- * being 4 system words instead of two (16 instead of 8 bytes on a 32-bit system).
- * Internally, it's implemented similarly to java's StringBuffer.
+ * Behaves the same as built-in arrays, except about 3x faster with concatenation
+ * 
  * Use .data to access the underlying array.
  * ArrayBuilder is a value type, so all copies point to the same data, unless either:
  * - A slice is taken and then appended to.
@@ -127,7 +127,7 @@ struct ArrayBuilder(T)
 		array[size - 1] = elem;
 	}
 
-	/// temporary until opCatAssign always works
+	/// Temporary until opCatAssign always works
 	T* append(T elem)
 	{
 		size++;
@@ -136,7 +136,8 @@ struct ArrayBuilder(T)
 		return &array[size - 1];
 	}
 
-	void opCatAssign(T[] elem) /// ditto
+	///
+	void opCatAssign(T[] elem)
 	{
 		size_t old_size = size; // same as push
 		size += elem.length;
@@ -144,6 +145,7 @@ struct ArrayBuilder(T)
 		array[old_size .. size] = elem[0 .. $];
 	}
 
+	///
 	void opOpAssign(string op)(AT elem) if (op == "~")
 	{
 		size_t old_size = size;
@@ -158,8 +160,8 @@ struct ArrayBuilder(T)
 		assert(i < size, format("array index %s out of bounds 0..%s", i, size));
 		return &array[i];
 	}
-
-	T opIndexAssign(T val, size_t i) /// ditto
+	/// ditto
+	T opIndexAssign(T val, size_t i) 
 	{
 		assert(i < size, format("array index %s out of bounds 0..%s", i, size));
 		return array[i] = val;
@@ -170,8 +172,8 @@ struct ArrayBuilder(T)
 	{
 		return AT(array[0 .. size]);
 	}
-
-	AT opSlice(size_t start, size_t end) /// ditto
+ 	/// ditto
+	AT opSlice(size_t start, size_t end)
 	{
 		assert(end <= size, format("array index %s out of bounds 0..%s", end, size));
 		return AT(array[start .. end]); // overloads a[i .. j]
@@ -224,7 +226,7 @@ struct ArrayBuilder(T)
 	/**
 	 * Add and remove elements from the array, in-place.
 	 * Params:
-	 *     index =
+	 *     index = pivot
 	 *     remove = Number of elements to remove, including and after index (can be 0)
 	 *     insert = Element to insert before index, after elements have been removed. */
 	void splice(size_t index, size_t remove, T[] insert...)
@@ -243,6 +245,7 @@ struct ArrayBuilder(T)
 		return ""; // TODO this needs to output the data. swritef(data);
 	}
 
+	/// Grow the internal array
 	private void grow()
 	{
 		if (array.length < size || size * 4 < array.length)
@@ -254,7 +257,6 @@ struct ArrayBuilder(T)
 		}
 	}
 }
-
 unittest
 {
 	{

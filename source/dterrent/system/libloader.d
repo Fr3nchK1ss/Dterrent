@@ -1,25 +1,24 @@
 /**
 	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
-
+	Copyright: public domain
  */
 
 module dterrent.system.libloader;
 import dterrent.system.logger;
 
-/* All the libs used by Dterrent */
+// All the dyn loaded libs used by Dterrent
 import bindbc.sdl;
 import bindbc.sdl.image;
 import bindbc.openal;
 import bindbc.freetype;
 import bindbc.opengl;
 
-/* Mixins declarations */
+
 /**
  * Log errors when external libraries fail to load.
  * Params:
  * E = The Enum returned by the bindbc loader
- * loaded = the Enum value which indicates the loading succeeded
+ * validVersion = the valid version defined in json
  * libName = The cosmetic name of the library to be loaded
  */
 mixin template mxtpl_logResult(E, E validVersion, string libName)
@@ -86,7 +85,7 @@ void loadAll()
 
     writeln("");
 }
-
+///
 void loadOpenGL()
 {
     mixin mxtpl_logResult!(GLSupport, GLSupport.gl46, "OpenGL");
@@ -96,12 +95,12 @@ void loadOpenGL()
 
     writeln("");
 }
-
+///
 bool isOpenALLoaded()
 {
     return bindbc.openal.isOpenALLoaded();
 }
-
+///
 void unloadAll()
 {
 

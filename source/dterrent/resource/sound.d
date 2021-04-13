@@ -1,7 +1,8 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+	This module loads sound from files
 
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
 
 module dterrent.resource.sound;
@@ -27,7 +28,8 @@ import yage.scene.sound;
  * A Sound is a represenation of sound data in system memory.
  * Sounds use a SoundFile as a member variable, which abstracts away the differences between different sound formats.
  * During initialization, a Sound loads the sound data from a file and
- * passes it on to OpenAL for playback, as it's needed. */
+ * passes it on to OpenAL for playback, as it's needed.
+ */
 class Sound
 {
 

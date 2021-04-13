@@ -1,9 +1,10 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+    Rewrite of yage3d system module
 
-	This class is a rewrite of yage3D System class.
+	Authors: Poggel / Fr3nchK1ss
+	Copyright: Contact Fr3nchK1ss
  */
+
 
 module dterrent.system.system;
 import dterrent.system.logger;
@@ -23,7 +24,7 @@ import yage.resource.manager;
 Tid system_thread; // reference to thread that called init, typically the main thread
 bool isSoundON = true;
 
-/* Load external libs */
+/// Load external libs and initialize them
 void init()
 {
 	import std.datetime.stopwatch : StopWatch, AutoStart;
@@ -56,7 +57,7 @@ void init()
 }
 
 /**
- * Perform a clean stop of the engine
+ * Perform a clean stop of the engine, unload dyn libs
  */
 void stop()
 {
@@ -87,6 +88,7 @@ void stop()
 
 }
 
+///
 struct Credit
 {
 	string name;

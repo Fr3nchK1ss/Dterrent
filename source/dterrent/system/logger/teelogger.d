@@ -1,7 +1,8 @@
 /**
-	Authors: Fr3nchK1ss on github
-	Copyright: proprietary / contact dev
+  A logger module which logs both in a terminal and in a file (unix tee)
 
+	Authors: Fr3nchK1ss on github
+	Copyright: public domain
  */
 
 module dterrent.system.logger.teelogger;
@@ -16,7 +17,7 @@ import dterrent.system.logger.consolelogger;
  */
 class DtrtLogger : MultiLogger
 {
-
+  ///
   this(LogLevel lv = LogLevel.all)
   {
     super(lv);
