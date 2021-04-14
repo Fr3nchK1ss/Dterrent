@@ -29,7 +29,8 @@ import std.math; // PI
  *
  * Spotlights default to shining in the -z direction (the same as the default looking direction of the camera).
  * They can be rotated by rotating the Node itself.
- * */
+ *
+ */
 class LightNode : Node
 {
 	/// Values that can be assigned to type.
@@ -167,11 +168,6 @@ class LightNode : Node
 		if (add_ambient)
 			color += ambient.toVec3;	// diffuse scaled by intensity plus ambient.
 
-		/*
-		if (color.x>=1) color.x=1;
-		if (color.y>=1) color.y=1;
-		if (color.z>=1) color.z=1;
-		*/
 		return Color(color);
 	}
 

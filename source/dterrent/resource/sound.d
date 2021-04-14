@@ -12,6 +12,8 @@ import std.stdio;
 import std.format;
 import std.exception : enforce;
 import dterrent.system.sound;
+import dterrent.core.math;
+import dterrent.core.arraybuilder;
 
 /+
 import derelict.vorbis.vorbis;
@@ -19,7 +21,6 @@ import derelict.vorbis.enc;
 import derelict.vorbis.file;
 import yage.core.array;
 import yage.core.timer;
-import yage.core.math.vector;
 import yage.resource.manager;
 import yage.scene.sound;
 +/
@@ -76,7 +77,7 @@ class Sound
 		buffer_size = (buffer_size/sample_size)*sample_size;	// ensure a multiple of our sample size
 		buffers.length = buffers_ref.length = buffer_num;	// allocate empty buffers
 	}
-
++/
 	/// Release sound buffers.
 	~this()
 	{	dispose();
@@ -85,9 +86,9 @@ class Sound
 	void dispose() /// ditto
 	{	freeBuffers(0, buffer_num);	// ensure every buffer is released
 		buffer_num = 0;
-		delete sound_file;
+		sound_file.destroy();
 	}
-+/
+
 	/// Get the frequency of the sound (often 22050 or 44100)
 	uint getFrequency()
 	{
@@ -113,7 +114,7 @@ class Sound
 	{
 		return buffers_per_sec;
 	}
-	/+
+
 	/// Get the length of the sound in seconds
 	double getLength()
 	{	return (8.0*sound_file.size)/(sound_file.bits*sound_file.frequency*sound_file.channels);
@@ -123,7 +124,7 @@ class Sound
 	uint getSize()
 	{	return sound_file.size;
 	}
-+/
+
 	/// Get the filename this Sound was loaded from.
 	string getSource()
 	{
@@ -307,25 +308,25 @@ private class VorbisFile : SoundFile
 }
 
 // ----------
-
++/
 
 // Copies of SoundNode properties to provide lock-free access.
 struct SoundCommand
 {	Sound sound;
-	Vec3f worldPosition;
-	Vec3f worldVelocity;
+	vec3 worldPosition;
+	vec3 worldVelocity;
 	float pitch;
 	float volume;
 	float radius;
 	float intensity; // used internally for sorting
 	float position; // playback position
 	size_t id;
-	SoundNode soundNode; // original SoundNode.  Must be used behind lock!
+	//SoundNode soundNode; // original SoundNode.  Must be used behind lock!
 	bool looping;
 	bool reseek;
 
 
-	int opCmp( SoundCommand rd)
+	int opCmp( SoundCommand rd) const
 	{
         return 0;
 	}
@@ -336,9 +337,9 @@ struct SoundCommand
 struct SoundList
 {	ArrayBuilder!(SoundCommand) commands;
 	long timestamp;
-	Vec3f cameraPosition;
-	Vec3f cameraRotation;
-	Vec3f cameraVelocity;
+	vec3 cameraPosition;
+	vec3 cameraRotation;
+	vec3 cameraVelocity;
 }
 
-+/
+

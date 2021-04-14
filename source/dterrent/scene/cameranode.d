@@ -13,6 +13,7 @@ import dterrent.scene.scene;
 import dterrent.scene.node;
 import dterrent.core.color;
 import dterrent.core.math;
+import dterrent.resource.sound;
 import std.math; // PI
 import gl3n.frustum;
 import gl3n.aabb;
@@ -23,7 +24,6 @@ import yage.scene.visible;
 import yage.resource.graphics.all;
 import yage.system.graphics.probe;
 import yage.scene.sound;
-import yage.resource.sound;
 +/
 
 
@@ -78,8 +78,9 @@ class CameraNode : Node
 			}
 		}
 	}
-/+
+
 	TripleBuffer!(SoundList) soundLists;
+/+
 	TripleBuffer!(RenderList) renderLists;
 
 	/**
@@ -87,7 +88,7 @@ class CameraNode : Node
 	RenderList getRenderList()
 	{	return renderLists.getNextRead();
 	}
-
++/
 	/**
 	 * List of SoundCommands that this camera can hear, in order from loudest to most quiet. */
 	SoundList getSoundList()
@@ -104,10 +105,11 @@ class CameraNode : Node
 		int i;
 		foreach (soundNode; allSounds) // Make a deep copy of the scene's sounds
 		{
+			/+
 			if (!soundNode.paused() && soundNode.getSound())
-			{	//Log.write(2);
+			{
 				SoundCommand command;
-				command.intensity = soundNode.getVolumeAtPosition(wp);
+				//command.intensity = soundNode.getVolumeAtPosition(wp);
 				if (command.intensity > 0.002) // A very quiet sound, arbitrary number
 				{
 					command.sound = soundNode.getSound();
@@ -124,14 +126,14 @@ class CameraNode : Node
 					addSorted!(SoundCommand, float)(list.commands, command, false, (SoundCommand s) { return s.intensity; }); // fails!!!
 				}
 			}
+			+/
 			i++;
 		}
-		list.timestamp = Clock.now().ticks(); // 100-nanosecond precision
 		list.cameraPosition = getWorldPosition();
 		list.cameraRotation = getWorldRotation();
 		list.cameraVelocity = getWorldVelocity();
 	}
-
+/+
 	static RenderList* currentRenderList;
 
 	void resetRenderCommands()
@@ -166,8 +168,6 @@ class CameraNode : Node
 	}
 	this(Node parent)
 	{	super(parent);
-		//renderLists.mutex = new Object();
-		//soundLists.mutex = new Object();
 		if (parent)
 		{
 			parent.addChild(this);
@@ -181,7 +181,7 @@ class CameraNode : Node
 	}
 
 /+
-	TODO: re-implement if necessary. Add frustum intersect in gl3n
+	TODO: re-implement if necessary. Add bounding sphere intersect in gl3n
 	bool isVisible(vec3 point, float radius)
 	{
 		// See if it's inside the frustum
@@ -225,59 +225,25 @@ class CameraNode : Node
 				scene.addCamera(this);
 		}
 	}
-/+
-	/*
-	 * Update the frustums when the camera moves.
 
-	 TODO: step by step update of this func
+	/*
+	  Update the frustums when the camera moves.
+
+	 	TODO: aspectratio should be replaced by screen w / h
 	 */
 	override protected void calcWorld()
 	{
 		super.calcWorld();
 
 		// Create the clipping matrix from the modelview and projection matrices
-		Matrix projection = Matrix.createProjection(fov*3.1415927/180f, aspectRatio, near, far);
-		//Log.write("camera ", worldRotation);
-		Matrix model = Matrix.compose(transform.worldPosition, transform.worldRotation, transform.worldScale).inverse();
-		(model*projection).getFrustum(frustum);
+		mat4 projection = mat4.perspective( aspectRatio*600, 600, fov, near, far ); // TODO: hardcoded 600
+		mat4 model = mat4.identity;
+		model.translate(transform.worldPosition);
+		model.set_rotation( transform.worldRotation.to_matrix!(3,3) );
+		//model.scale(transform.worldScale);
+		model.invert();
+		frustum = Frustum(model*projection);
 
-		/*
-		// TODO: Use frustum optimizations from: http://www.flipcode.com/archives/Frustum_Culling.shtml
-
-		// calculate the radius of the frustum sphere
-		float fViewLen = far - near;
-
-		// use some trig to find the height of the frustum at the far plane
-		float fHeight = fViewLen * tan(fov*3.1415927/180 * 0.5f);
-
-		// with an aspect ratio of 1, the width will be the same
-		float fWidth = fHeight;
-
-		// halfway point between near/far planes starting at the origin and extending along the z axis
-		vec3 P = vec3(0.0f, 0.0f, near + fViewLen * 0.5f);
-
-		// the calculate far corner of the frustum
-		vec3 Q = vec3(fWidth, fHeight, fViewLen);
-
-		// the vector between P and Q
-		vec3 vDiff = P - Q;
-
-		// the radius becomes the length of this vector
-		frustumSphereRadiusSquared = vDiff.length() * .5;
-		frustumSphereRadiusSquared *= frustumSphereRadiusSquared;
-
-		// get the look vector of the camera from the view matrix
-		vec3 vLookVector = vec3(0, 0, -1);
-
-		auto worldTransform = Matrix.compose(worldPosition, worldRotation, worldScale);
-		vLookVector = vLookVector.rotate(worldTransform);
-
-		//m_mxView.LookVector(&vLookVector);
-
-		// calculate the center of the sphere
-		frustumSphereCenter = worldPosition + (vLookVector * (fViewLen * 0.5f) + near);
-		//Log.write(frustumSphereCenter, frustumSphereRadiusSquared);
-		*/
 	}
-+/
+
 }

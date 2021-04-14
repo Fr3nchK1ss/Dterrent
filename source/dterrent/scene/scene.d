@@ -14,15 +14,12 @@ import dterrent.scene.node;
 import dterrent.core;
 import dterrent.scene.lightnode;
 import dterrent.scene.cameranode;
+import dterrent.scene.soundnode;
+import dterrent.resource.sound;
 
 /+
-import tango.core.Thread;
-import tango.time.Clock;
 import yage.system.system;
 import yage.system.sound.soundsystem;
-import yage.scene.camera;
-import yage.scene.light;
-import yage.scene.sound;
 import yage.scene.visible;
 +/
 
@@ -70,9 +67,8 @@ class Scene : Node, IDisposable
 
 	protected LightNode[LightNode] lights;
 	protected CameraNode[CameraNode] cameras;
-/+
 	protected SoundNode[SoundNode] sounds;
-+/
+
 	protected Mutex mutex;
 	protected Mutex camerasMutex;
 	protected Mutex lightsMutex; // Having a separate mutex prevents render from waiting for the start of the next update loop.
@@ -271,7 +267,7 @@ class Scene : Node, IDisposable
 	{
 		cameras.remove(camera);
 	}
-/+
+
 	/**
 	 * Get all CameraNodes that are currently a part of this scene.
 	 * Returns: a self indexed array. */
@@ -296,7 +292,7 @@ class Scene : Node, IDisposable
 	SoundNode[SoundNode] getAllSounds()
 	{	return sounds;
 	}
-+/
+
 	/*
 	 * Used internally. */
 	Object getSoundsMutex()
