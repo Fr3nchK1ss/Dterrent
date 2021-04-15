@@ -15,8 +15,6 @@ dterrent-test-*
 *.log
 *.bak
 *.selections.json
-Yage3d/ARCHI
-Yage3d/res
 bin
 gfm
 TODO.txt
