@@ -1,5 +1,7 @@
 # Dterrent ![D](https://github.com/Fr3nchK1ss/Dterrent/workflows/D/badge.svg)
 
+DISCONTINUED, read POST-MORTEM
+
 Minimalist game engine in D (Dlang). Intended for Linux.
 
 Dterrent tries to salvage the defunct yage3D project by JoeCoder, at least its architecture, ideally replacing most of the former components with D2 features or Dub packages. In this aspect, it is a proof of concept for a 3D engine built upon Dlang community-made "building bricks", without reinventing the wheel.
